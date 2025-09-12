@@ -3,9 +3,14 @@
 #include "WiFiManagerCustom.h"
 #include "StatusLEDs.h"
 #include "TemperatureSensors.h"
+#include "TimeManager.h"
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 2 // Most ESP32 boards use GPIO2 for the onboard LED
 #endif
+
+// Declare global objects for timeClient
+// WiFiUDP ntpUDP; // Commented out to avoid multiple definitions
+// NTPClient timeClient(ntpUDP); // Commented out to avoid multiple definitions
 
 SystemStatus status; // Declare status variable
 
@@ -14,14 +19,46 @@ int myFunction(int, int);
 
 void setup()
 {
-  pinMode(LED_BUILTIN, OUTPUT);
+
   Serial.begin(115200);
-  delay(1000);              // Give time for Serial to initialize
-  initStatusLEDs();        // Initialize Status LEDs
-  initTemperatureSensors();// Initialize Temperature Sensors
+  delay(1000); // Give time for Serial to initialize
+  Serial.println("\n=== ESP32 Temperature Controller Starting ===");
+  Serial.print("Free heap: ");
+  Serial.print(ESP.getFreeHeap());
+  Serial.println(" bytes");
+  Serial.print("Free PSRAM: ");
+  Serial.print(ESP.getFreePsram());
+  Serial.println(" bytes");
+  delay(1000); // Wait a moment before proceeding
+  pinMode(LED_BUILTIN, OUTPUT);
+  Serial.println("✅ Basic hardware initialized");
+  delay(1000);      // Wait a moment to ensure LEDs are ready
+  initStatusLEDs(); // Initialize Status LEDs
+  Serial.println("✅ Status LEDs initialized");
+  delay(1000);              // Wait a moment to ensure LEDs are ready
   status.wifi = CONNECTING; // Initial WiFi status
   initWiFi(status);         // Initialize WiFi
-  
+  initTemperatureSensors(); // Initialize Temperature Sensors
+  Serial.println("✅ Temperature sensors initialized");
+  delay(1000); // Wait a moment to ensure sensors are ready
+  Serial.println("✅ WiFi initialization started");
+  delay(1000); // Wait a moment to ensure LEDs are ready
+  timeClient.begin();
+  getTime(); // Initialize Time Manager
+  Serial.println("✅ Time Manager initialized");
+  Serial.print("Hours ");
+  Serial.print(Hours);
+  Serial.print(": Minutes ");
+  Serial.println(Minutes);
+  Serial.print("currentDay ");
+  Serial.print(currentDay);
+  Serial.print(": currentMonth ");
+  Serial.println(currentMonth);
+  Serial.println("✅ Time Manager initialized");
+  Serial.println("✅ Time Manager initialized");
+  Serial.println("✅ Time Manager initialized");
+  delay(1000); // Wait a moment to ensure Time Manager is ready
+  // status.heater = HEATER_OFF; // Start with heater off
 }
 void loop()
 {
@@ -79,25 +116,25 @@ void loop()
   //                end.                       ===
   //==============================================
 
-   Serial.println("Looping...");
-   Serial.print("WiFi Status: ");
-   /*************************************
-    * Get the temperature from sensors  *
-    *     This will be moved to         *
-    *     the HeaterControl.cpp.        *
-    *     function later                *
-    *     start                         *
-    ************************************/
-   readAllSensors();
+  Serial.println("Looping...");
+  Serial.print("WiFi Status: ");
+  /*************************************
+   * Get the temperature from sensors  *
+   *     This will be moved to         *
+   *     the HeaterControl.cpp.        *
+   *     function later                *
+   *     start                         *
+   ************************************/
+  readAllSensors();
 
-    /**************************************
-     * Get the temperature from sensors  *
-     *     This will be moved to         *
-     *     the HeaterControl.cpp.        *
-     *     function later                *
-     *     end                           *
-     ************************************/
-   /**/
+  /**************************************
+   * Get the temperature from sensors  *
+   *     This will be moved to         *
+   *     the HeaterControl.cpp.        *
+   *     function later                *
+   *     end                           *
+   ************************************/
+  /**/
   // switch (status.wifi)
   // {
   // // case CONNECTING:
