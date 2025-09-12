@@ -2,6 +2,7 @@
 #include "Config.h"
 #include "WiFiManagerCustom.h"
 #include "StatusLEDs.h"
+#include "TemperatureSensors.h"
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 2 // Most ESP32 boards use GPIO2 for the onboard LED
 #endif
@@ -17,6 +18,7 @@ void setup()
   Serial.begin(115200);
   delay(1000);              // Give time for Serial to initialize
   initStatusLEDs();        // Initialize Status LEDs
+  initTemperatureSensors();// Initialize Temperature Sensors
   status.wifi = CONNECTING; // Initial WiFi status
   initWiFi(status);         // Initialize WiFi
   
@@ -79,6 +81,23 @@ void loop()
 
    Serial.println("Looping...");
    Serial.print("WiFi Status: ");
+   /*************************************
+    * Get the temperature from sensors  *
+    *     This will be moved to         *
+    *     the HeaterControl.cpp.        *
+    *     function later                *
+    *     start                         *
+    ************************************/
+   readAllSensors();
+
+    /**************************************
+     * Get the temperature from sensors  *
+     *     This will be moved to         *
+     *     the HeaterControl.cpp.        *
+     *     function later                *
+     *     end                           *
+     ************************************/
+   /**/
   // switch (status.wifi)
   // {
   // // case CONNECTING:
