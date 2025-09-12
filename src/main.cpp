@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "Config.h"
 #include "WiFiManagerCustom.h"
-// #include "StatusLEDs.h"
+#include "StatusLEDs.h"
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 2 // Most ESP32 boards use GPIO2 for the onboard LED
 #endif
@@ -16,20 +16,13 @@ void setup()
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(115200);
   delay(1000);              // Give time for Serial to initialize
+  initStatusLEDs();        // Initialize Status LEDs
   status.wifi = CONNECTING; // Initial WiFi status
   initWiFi(status);         // Initialize WiFi
-  // initStatusLEDs();
-  // AllLEDsOff();
-  delay(10000); // Wait 10 seconds
-  // updateLEDs(status); // Initial LED update
-  delay(10000); // Wait 10 second
-  // put your setup code here, to run once:
-  // int result = myFunction(2, 3);
+  
 }
 void loop()
 {
-  // put your main code here, to run repeatedly:
-  // put your main code here, to run repeatedly:
   // handleWiFi(status);
   digitalWrite(LED_BUILTIN, HIGH); // LED ON
   Serial.println("LED ON");

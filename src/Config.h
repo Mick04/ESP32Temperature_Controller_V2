@@ -9,7 +9,7 @@ enum WiFiState
 {
     CONNECTING,
     CONNECTED,
-    ERROR
+    DISCONNECTED
 };
 
 enum FirebaseState
