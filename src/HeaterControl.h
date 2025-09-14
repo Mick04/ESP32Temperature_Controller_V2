@@ -1,18 +1,18 @@
-// // ================================
-// // Heater Control Functions
-// // ================================
+// ================================
+// Heater Control Functions
+// ================================
 
-// #ifndef HEATERCONTROL_H
-// #define HEATERCONTROL_H
+#ifndef HEATERCONTROL_H
+#define HEATERCONTROL_H
 
-// #include <Arduino.h>
-// #include "Config.h"
-// // #include "TimeManager.h"
+#include <Arduino.h>
+#include "Config.h"
+#include "TimeManager.h"
 
 
-// // Function declarations
-// void updateHeaterControl();
-// void refreshScheduleCache(); // Force refresh of cached schedule values
-// void getTime();
-// void publishSystemData();
-// #endif // HEATERCONTROL_H
+// Function declarations
+void updateHeaterControl();
+void refreshScheduleCache(); // Force refresh of cached schedule values
+void getTime();
+void publishSystemData();
+#endif // HEATERCONTROL_H

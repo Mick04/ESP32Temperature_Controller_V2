@@ -27,18 +27,18 @@ enum FirebaseState
 //     MQTT_STATE_ERROR
 // };
 
-// enum HeaterState
-// {
-//     HEATER_OFF,
-//     HEATER_ON,
-//     HEATER_ERROR
-// };
+enum HeaterState
+{
+    HEATER_OFF,
+    HEATER_ON,
+    HEATER_ERROR
+};
 
 struct SystemStatus
 {
     WiFiState wifi;
     // MQTTState mqtt;
-    // HeaterState heater;
+    HeaterState heater;
     // Add other status fields as needed
     FirebaseState firebase;
 };

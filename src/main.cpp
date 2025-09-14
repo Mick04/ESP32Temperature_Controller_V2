@@ -7,6 +7,7 @@
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 2 // Most ESP32 boards use GPIO2 for the onboard LED
 #endif
+#include "TempInput.h"
 
 // Declare global objects for timeClient
 // WiFiUDP ntpUDP; // Commented out to avoid multiple definitions
@@ -30,21 +31,33 @@ void setup()
   Serial.print(ESP.getFreePsram());
   Serial.println(" bytes");
   delay(1000); // Wait a moment before proceeding
-  pinMode(LED_BUILTIN, OUTPUT);
+
+  pinMode(LED_BUILTIN, OUTPUT); // Initialize the BUILTIN_LED pin as an output
+
   Serial.println("✅ Basic hardware initialized");
-  delay(1000);      // Wait a moment to ensure LEDs are ready
+  delay(1000); // Wait a moment to ensure LEDs are ready
+
   initStatusLEDs(); // Initialize Status LEDs
+
   Serial.println("✅ Status LEDs initialized");
-  delay(1000);              // Wait a moment to ensure LEDs are ready
+  delay(1000); // Wait a moment to ensure LEDs are ready
+
   status.wifi = CONNECTING; // Initial WiFi status
-  initWiFi(status);         // Initialize WiFi
+
+  Serial.println("✅ WiFi initialization started");
+
+  initWiFi(status); // Initialize WiFi
+
   initTemperatureSensors(); // Initialize Temperature Sensors
+
   Serial.println("✅ Temperature sensors initialized");
   delay(1000); // Wait a moment to ensure sensors are ready
-  Serial.println("✅ WiFi initialization started");
+
   delay(1000); // Wait a moment to ensure LEDs are ready
+
   timeClient.begin();
   getTime(); // Initialize Time Manager
+
   Serial.println("✅ Time Manager initialized");
   Serial.print("Hours ");
   Serial.print(Hours);
@@ -71,6 +84,11 @@ void loop()
   //                start.                     ===
   //==============================================
   handleWiFi(status);
+  //===============================================
+  //  Check WiFi status and print RSSI value.
+  //  this if statement can be moved to WiFiManagerCustom.cpp
+  //  and published to MQTT broker for react app to read
+  //===============================================
   if (WiFi.status() == WL_CONNECTED)
   {
     long rssi = WiFi.RSSI();
@@ -83,6 +101,7 @@ void loop()
     Serial.println("LED OFF");
     delay(500); // Wait 500ms
 
+//Serial.prints can be deleted when programming is complete
     Serial.println("===============================");
     if (rssi > -50)
     {
@@ -155,6 +174,11 @@ void loop()
   //   } else {
   //       Serial.println("WiFi is not connected.");
   //   }
+
+  // inputAmTempFromSerial();
+  // inputPmTempFromSerial();
+  // inputAmTimeFromSerial();
+  // inputPmTimeFromSerial();
 }
 // put function definitions here:
 int myFunction(int x, int y)
