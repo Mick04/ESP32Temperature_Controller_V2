@@ -13,7 +13,8 @@ void initStatusLEDs()
     FastLED.addLeds<LED_TYPE, WS2811_PIN, COLOR_ORDER>(leds, NUM_LEDS);
     FastLED.setBrightness(50); // Set brightness to 50/255
     FastLED.clear();
-    FastLED.show();
+    leds[LED_HEATER] = CRGB::Black; // Ensure heater LED is off at startup
+    FastLED.show(); // Initial clear
 }
 
 void updateLEDs(SystemStatus &status)
@@ -49,39 +50,39 @@ void updateLEDs(SystemStatus &status)
     //     break;
     // }
 
-    // // Set MQTT LED based on status
-    // switch (status.mqtt)
-    // {
-    // case MQTT_STATE_DISCONNECTED:
-    //     leds[LED_MQTT] = CRGB::Black; // Off
-    //     break;
-    // case MQTT_STATE_CONNECTING:
-    //     leds[LED_MQTT] = CRGB::Blue;
-    //     break;
-    // case MQTT_STATE_CONNECTED:
-    //     leds[LED_MQTT] = CRGB::Green;
-    //     break;
-    // case MQTT_STATE_ERROR:
-    //     leds[LED_MQTT] = CRGB::Red;
-    //     break;
-    // }
+    // Set MQTT LED based on status
+    switch (status.mqtt)
+    {
+    case MQTT_STATE_DISCONNECTED:
+        leds[LED_MQTT] = CRGB::Black; // Off
+        break;
+    case MQTT_STATE_CONNECTING:
+        leds[LED_MQTT] = CRGB::Blue;
+        break;
+    case MQTT_STATE_CONNECTED:
+        leds[LED_MQTT] = CRGB::Green;
+        break;
+    case MQTT_STATE_ERROR:
+        leds[LED_MQTT] = CRGB::Red;
+        break;
+    }
 
-    // // Set Heater LED based on status
-    // switch (status.heater)
-    // {
-    // case HEATER_OFF:
-    //     leds[LED_HEATER] = CRGB::Green; // Off
+    // Set Heater LED based on status
+    switch (status.heater)
+    {
+    case HEATER_OFF:
+        leds[LED_HEATER] = CRGB::Green; // Off
+        break;
+    case HEATER_ON:
+        leds[LED_HEATER] = CRGB::Red; // Heating
+        break;
+    // case HEATER_AUTO:
+    //     leds[LED_HEATER] = CRGB::Yellow; // Auto mode
     //     break;
-    // case HEATER_ON:
-    //     leds[LED_HEATER] = CRGB::Red; // Heating
-    //     break;
-    // // case HEATER_AUTO:
-    // //     leds[LED_HEATER] = CRGB::Yellow; // Auto mode
-    // //     break;
-    // case HEATER_ERROR:
-    //     leds[LED_HEATER] = CRGB::Red; // Error
-    //     break;
-    // }
+    case HEATER_ERROR:
+        leds[LED_HEATER] = CRGB::Red; // Error
+        break;
+    }
 
     FastLED.show();
 }

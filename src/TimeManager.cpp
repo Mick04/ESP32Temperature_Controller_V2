@@ -97,7 +97,8 @@ int currentSecond = second(epochTime);
 currentDay = day(epochTime);
 currentMonth = month(epochTime);
 int currentYear = year(epochTime);
-
+Serial.println("******************Getting Time...**************");
+Serial.printf("Date and Time: %02d-%02d-%04d %02d:%02d:%02d\n", currentDay, currentMonth, currentYear, Hours, Minutes, currentSecond);
 Serial.print("DST Active: ");
 Serial.println(dstActive ? "Yes" : "No");
 Serial.print("DST Offset (seconds): ");
@@ -257,7 +258,7 @@ Serial.println(offset);
 //     Hours = hour(epochTime);
 //     Minutes = minute(epochTime);
 //     int currentSecond = second(epochTime);
-//     String currentTime = getFormattedTime();
+     //String currentTime = getFormattedTime();
 
 //     // For GMT, we always use offset 0 (no DST adjustment)
 //     timeClient.setTimeOffset(0);
@@ -382,17 +383,17 @@ Serial.println(offset);
 // //     Serial.println(timeStr);
 // // }
 
-// String getFormattedTime()
-// {
-//     char timeBuffer[10];
-//     sprintf(timeBuffer, "%02d:%02d", Hours, Minutes);  // Always 2 digits for hours
-//     return String(timeBuffer);
-// }
+String getFormattedTime()
+{
+    char timeBuffer[10];
+    sprintf(timeBuffer, "%02d:%02d", Hours, Minutes);  // Always 2 digits for hours
+    return String(timeBuffer);
+}
 
-// String getFormattedDate()
-// {
-//     time_t epochTime = timeClient.getEpochTime();
-//     char dateBuffer[20];
-//     sprintf(dateBuffer, "%d/%d/%d", currentDay, currentMonth, year(epochTime));
-//     return String(dateBuffer);
-// }
+String getFormattedDate()
+{
+    time_t epochTime = timeClient.getEpochTime();
+    char dateBuffer[20];
+    sprintf(dateBuffer, "%d/%d/%d", currentDay, currentMonth, year(epochTime));
+    return String(dateBuffer);
+}

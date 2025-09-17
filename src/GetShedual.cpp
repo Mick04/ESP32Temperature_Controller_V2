@@ -203,10 +203,11 @@ void handleScheduleUpdate(const char *topic, const String &message)
 
     if (topicStr.endsWith("control/schedule"))
     {
-        if (topicStr == "am/scheduledtime")
+        if (topicStr == "am/hour")
         {
             String amTime = message;
             currentSchedule.amTime = amTime;
+            Serial.print("💛💛💛💛💛💛💛💛💛💛💛💛💛💛💛");
             Serial.print("[DEBUG] Extracted amTime from MQTT: ");
             Serial.println(amTime);
             if (isValidTime(amTime))
@@ -218,7 +219,7 @@ void handleScheduleUpdate(const char *topic, const String &message)
 
                 Serial.println("[DEBUG] setAMTime called from MQTT");
                 setAMTime(amTime);
-                updateFirebaseScheduleData("/schedule/amScheduledTime", amTime);
+                //updateFirebaseScheduleData("/schedule/amScheduledTime", amTime);
             }
             else
             {
@@ -234,7 +235,7 @@ void handleScheduleUpdate(const char *topic, const String &message)
             {
                 Serial.println("[DEBUG] setPMTime called from MQTT");
                 setPMTime(pmTime);
-                updateFirebaseScheduleData("/schedule/pmScheduledTime", pmTime);
+                //updateFirebaseScheduleData("/schedule/pmScheduledTime", pmTime);
             }
             else
             {
@@ -250,7 +251,7 @@ void handleScheduleUpdate(const char *topic, const String &message)
             {
                 Serial.println("[DEBUG] setAMTemperature called from MQTT");
                 setAMTemperature(amTemp);
-                updateFirebaseScheduleData("/schedule/amTemperature", String(amTemp));
+                //updateFirebaseScheduleData("/schedule/amTemperature", String(amTemp));
             }
             else
             {
@@ -266,7 +267,7 @@ void handleScheduleUpdate(const char *topic, const String &message)
             {
                 Serial.println("[DEBUG] setPMTemperature called from MQTT");
                 setPMTemperature(pmTemp);
-                updateFirebaseScheduleData("/schedule/pmTemperature", String(pmTemp));
+                //updateFirebaseScheduleData("/schedule/pmTemperature", String(pmTemp));
             }
             else
             {
@@ -337,24 +338,24 @@ void handleScheduleUpdate(const char *topic, const String &message)
             Serial.println("❌ Invalid PM time format received via MQTT");
         }
     }
-    else if (topicStr.endsWith("/am/enabled"))
-    {
-        bool enabled = (message == "true");
-        currentSchedule.amEnabled = enabled;
-        updateSuccessful = true;
-        firebasePath = "/schedule/amEnabled";
-        Serial.print("✅ AM Enabled updated via MQTT: ");
-        Serial.println(enabled ? "true" : "false");
-    }
-    else if (topicStr.endsWith("/pm/enabled"))
-    {
-        bool enabled = (message == "true");
-        currentSchedule.pmEnabled = enabled;
-        updateSuccessful = true;
-        firebasePath = "/schedule/pmEnabled";
-        Serial.print("✅ PM Enabled updated via MQTT: ");
-        Serial.println(enabled ? "true" : "false");
-    }
+    // else if (topicStr.endsWith("/am/enabled"))
+    // {
+    //     bool enabled = (message == "true");
+    //     currentSchedule.amEnabled = enabled;
+    //     updateSuccessful = true;
+    //     firebasePath = "/schedule/amEnabled";
+    //     Serial.print("✅ AM Enabled updated via MQTT: ");
+    //     Serial.println(enabled ? "true" : "false");
+    // }
+    // else if (topicStr.endsWith("/pm/enabled"))
+    // {
+    //     bool enabled = (message == "true");
+    //     currentSchedule.pmEnabled = enabled;
+    //     updateSuccessful = true;
+    //     firebasePath = "/schedule/pmEnabled";
+    //     Serial.print("✅ PM Enabled updated via MQTT: ");
+    //     Serial.println(enabled ? "true" : "false");
+    // }
     else if (topicStr.endsWith("/am/scheduledtime"))
     {
         if (isValidTime(message))
@@ -427,7 +428,7 @@ void handleScheduleUpdate(const char *topic, const String &message)
     // Update Firebase if MQTT update was successful
     if (updateSuccessful && firebasePath.length() > 0)
     {
-        updateFirebaseScheduleData(firebasePath, message);
+        //updateFirebaseScheduleData(firebasePath, message);
     }
 
     // Print updated schedule
