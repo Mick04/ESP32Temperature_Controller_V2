@@ -46,7 +46,7 @@ void setPMTime(const String &time);
 
 // Firebase integration
 void fetchScheduleDataFromFirebase();
-void updateFirebaseScheduleData(const String &path, const String &value);
+//void updateFirebaseScheduleData(const String &path, const String &value);
 float getCurrentScheduledTemperature();
 String formatTime(int hours, int minutes);
 

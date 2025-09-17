@@ -1,3 +1,5 @@
+// Getter for current target temperature
+float getTargetTemp();
 // ================================
 // Heater Control Functions
 // ================================
@@ -9,9 +11,8 @@
 #include "Config.h"
 #include "TimeManager.h"
 
-
 // Function declarations
-void updateHeaterControl();
+void updateHeaterControl(SystemStatus &status);
 void refreshScheduleCache(); // Force refresh of cached schedule values
 void getTime();
 void publishSystemData();

@@ -4,10 +4,11 @@
 #include "StatusLEDs.h"
 #include "TemperatureSensors.h"
 #include "TimeManager.h"
+#include "HeaterControl.h"
+#include "MQTTManager.h"
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 2 // Most ESP32 boards use GPIO2 for the onboard LED
 #endif
-#include "TempInput.h"
 
 // Declare global objects for timeClient
 // WiFiUDP ntpUDP; // Commented out to avoid multiple definitions
@@ -101,7 +102,7 @@ void loop()
     Serial.println("LED OFF");
     delay(500); // Wait 500ms
 
-//Serial.prints can be deleted when programming is complete
+    // Serial.prints can be deleted when programming is complete
     Serial.println("===============================");
     if (rssi > -50)
     {
@@ -144,7 +145,26 @@ void loop()
    *     function later                *
    *     start                         *
    ************************************/
-  readAllSensors();
+  // If MQTT is connected, check for temperature changes and publish when needed
+  static unsigned long lastMQTTCheck = 0;
+  if (status.mqtt == MQTT_STATE_CONNECTED && millis() - lastMQTTCheck > 5000) // Check every 5 seconds
+  {
+    // Read all temperature sensors first
+    readAllSensors();
+
+    // Check if any temperature values have changed
+    if (checkTemperatureChanges())
+    {
+      Serial.println("\n=== MQTT Publish (Temperature Change Detected) ===");
+
+      // Publish sensor data (includes time and system data)
+      publishSensorData();
+
+      Serial.println("=== End MQTT Publish ===\n");
+    }
+
+    lastMQTTCheck = millis();
+  }
 
   /**************************************
    * Get the temperature from sensors  *
@@ -153,32 +173,31 @@ void loop()
    *     function later                *
    *     end                           *
    ************************************/
-  /**/
-  // switch (status.wifi)
-  // {
-  // // case CONNECTING:
-  // //   Serial.println("CONNECTING");
-  // //   updateLEDs(status);
-  // //   delay(10000); // Wait 10 seconds to allow LED update to be visible
-  // //   break;
-  // // case CONNECTED:
-  // //   Serial.println("CONNECTED");
-  // //   updateLEDs(status);
-  // //   break;
-  // // case ERROR:
-  // //   Serial.println("ERROR");
-  // //   break;
-  // // }
-  // if (status.wifi == CONNECTED) {
-  //       Serial.println("WiFi is connected.");
-  //   } else {
-  //       Serial.println("WiFi is not connected.");
-  //   }
 
-  // inputAmTempFromSerial();
-  // inputPmTempFromSerial();
-  // inputAmTimeFromSerial();
-  // inputPmTimeFromSerial();
+  /************************************
+   * MQTT Connection Management.        *
+   *     start                          *
+   *************************************/
+
+  // Handle MQTT connection (will initialize when WiFi is ready)
+  static bool mqttInitialized = false;
+  if (status.wifi == CONNECTED && !mqttInitialized)
+  {
+    initMQTT();
+    mqttInitialized = true;
+  }
+  if (mqttInitialized)
+  {
+    handleMQTT();                  // This calls mqttClient.loop() internally
+    status.mqtt = getMQTTStatus(); // Update MQTT status
+  }
+
+  // Update heater control and LEDs using the unified status object
+  updateHeaterControl(status);
+  /*************************************
+   *   MQTT Connection Management.     *
+   *    end                        *
+   *************************************/
 }
 // put function definitions here:
 int myFunction(int x, int y)

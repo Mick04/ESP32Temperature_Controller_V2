@@ -19,13 +19,13 @@ enum FirebaseState
     FB_ERROR
 };
 
-// enum MQTTState
-// {
-//     MQTT_STATE_DISCONNECTED,
-//     MQTT_STATE_CONNECTING,
-//     MQTT_STATE_CONNECTED,
-//     MQTT_STATE_ERROR
-// };
+enum MQTTState
+{
+    MQTT_STATE_DISCONNECTED,
+    MQTT_STATE_CONNECTING,
+    MQTT_STATE_CONNECTED,
+    MQTT_STATE_ERROR
+};
 
 enum HeaterState
 {
@@ -37,7 +37,7 @@ enum HeaterState
 struct SystemStatus
 {
     WiFiState wifi;
-    // MQTTState mqtt;
+    MQTTState mqtt;
     HeaterState heater;
     // Add other status fields as needed
     FirebaseState firebase;
@@ -55,11 +55,11 @@ struct SystemStatus
 #define FIREBASE_DATABASE_URL "https://esp32-heater-controler-6d11f-default-rtdb.europe-west1.firebasedatabase.app/"
 // === Firebase End ===
 
-// // === MQTT (HiveMQ) Start ===
-// #define MQTT_BROKER_HOST "broker.hivemq.com"
-// #define MQTT_BROKER_PORT 8884
-// #define MQTT_USERNAME "ESP32FireBaseTortoise"
-// #define MQTT_PASS "ESP32FireBaseHea1951Ter"
+// === MQTT (HiveMQ) Start ===
+#define MQTT_BROKER_HOST "broker.hivemq.com"
+#define MQTT_BROKER_PORT 8884
+#define MQTT_USERNAME "ESP32FireBaseTortoise"
+#define MQTT_PASS "ESP32FireBaseHea1951Ter"
 
 // #define EMAIL_ALERT_ENABLED true // set to false to disable email alerts
 
@@ -83,8 +83,8 @@ struct SystemStatus
 // === LED Index Mapping ===
 #define LED_WIFI 0
 // #define LED_FIREBASE 1
-// #define LED_MQTT 2
-// #define LED_HEATER 3
+ #define LED_MQTT 2
+ #define LED_HEATER 3
 
 // #include <FastLED.h>
 
