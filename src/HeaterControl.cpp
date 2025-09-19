@@ -15,6 +15,7 @@ float getTargetTemp()
 #include "StatusLEDs.h"
 #include "TimeManager.h"
 #include "MQTTManager.h"
+#include "FirebaseService.h"
 #include "Config.h"
 
 // External declarations
@@ -71,7 +72,7 @@ void updateHeaterControl(SystemStatus &status)
         Serial.println("==================================================");
     }
    publishSingleValue("esp32/control/targetTemperature", (float)(round(targetTemp * 10) / 10.0));
-    // // Display current values BEFORE control logic
+   pushTargetTempToFirebase((float)(round(targetTemp * 10) / 10.0)); // // Display current values BEFORE control logic
     // Serial.print("************* Target Temperature **************: ");
     // Serial.println(targetTemp);
     // Serial.print("pmTime ");

@@ -3,7 +3,7 @@
 // ==================================================
 
 #include "GetSchedule.h"
-// #include "FirebaseService.h"
+#include "FirebaseService.h"
 #include "HeaterControl.h"
 // #include <Firebase_ESP_Client.h>
 
@@ -278,6 +278,8 @@ void handleScheduleUpdate(const char *topic, const String &message)
         {
             Serial.println("❌ Unrecognized schedule control topic");
         }
+
+        //pushTimeToFirebase(currentSchedule.amTime, currentSchedule.pmTime);
     }
     // Individual topic handling (AM/PM temperature, time, enabled, scheduledTime)
     if (topicStr.endsWith("/am/temperature"))

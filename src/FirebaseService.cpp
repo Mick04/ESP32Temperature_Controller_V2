@@ -219,3 +219,42 @@ void handleFirebase(SystemStatus &status)
         Serial.println("Firebase connection lost");
     }
 }
+void pushTargetTempToFirebase(float targetTemp) {
+    if (!fbInitialized) {
+        Serial.println("Firebase not initialized, cannot push target temperature");
+        return;
+    }
+    if (Firebase.RTDB.setFloat(&fbData, "ESP32/control/target_temperature", targetTemp)) {
+        Serial.print("✅ Target temperature pushed to Firebase: ");
+        Serial.println(targetTemp);
+    } else {
+        Serial.println("❌ Failed to push target temperature to Firebase");
+        Serial.print("Firebase error: ");
+        Serial.println(fbData.errorReason());
+    }
+}
+
+// void pushTimeToFirebase(const String& amTime, const String& pmTime) {
+//     if (!fbInitialized) {
+//         Serial.println("Firebase not initialized, cannot push scheduled times");
+//         return;
+//     }
+//     if (Firebase.RTDB.setFloat(&fbData, "ESP32/schedule/amScheduledTime", amTime)) {
+//         Serial.print("✅ AM Scheduled Time pushed to Firebase: ");
+//         Serial.println(amTime);
+//     } else {
+//         Serial.println("❌ Failed to push AM Scheduled Time to Firebase");
+//         Serial.print("Firebase error: ");
+//         Serial.println(fbData.errorReason());
+//     }
+
+//     if (Firebase.RTDB.setString(&fbData, "ESP32/schedule/pmScheduledTime", pmTime)) {
+//         Serial.print("✅ PM Scheduled Time pushed to Firebase: ");
+//         Serial.println(pmTime);
+//     } else {
+//         Serial.println("❌ Failed to push PM Scheduled Time to Firebase");
+//         Serial.print("Firebase error: ");
+//         Serial.println(fbData.errorReason());
+//     }
+
+

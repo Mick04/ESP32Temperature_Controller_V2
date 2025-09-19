@@ -503,15 +503,15 @@ void publishSensorData()
     {
         publishSingleValue(TOPIC_TEMP_GREEN, "ERROR");
     }
-    float targetTemp = getTargetTemp();
-    if (!isnan(targetTemp))
-    {
-        publishSingleValue("esp32/control/targetTemperature", (float)(round(targetTemp * 10) / 10.0)); // Round to 1 decimal place
-    }
-    else
-    {
-        publishSingleValue(TOPIC_TEMP_GREEN, "ERROR");
-    }
+    // float targetTemp = getTargetTemp();
+    // if (!isnan(targetTemp))
+    // {
+    //     publishSingleValue("esp32/control/targetTemperature", (float)(round(targetTemp * 10) / 10.0)); // Round to 1 decimal place
+    // }
+    // else
+    // {
+    //     publishSingleValue(TOPIC_TEMP_GREEN, "ERROR");
+    // }
 
     // Publish average temperature
     // if (validSensors > 0)

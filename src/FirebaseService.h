@@ -13,6 +13,9 @@ extern FirebaseData fbData;
 struct SystemStatus;
 void initFirebase(SystemStatus &status);
 void handleFirebase(SystemStatus &status);
+void pushTargetTempToFirebase(float targetTemp);
+// In FirebaseService.h
+//void pushTimeToFirebase(const String& amTime, const String& pmTime);
 //void pushSensorValuesToFirebase();
 //void checkAndPushTargetTemperature();
 //void checkFirebaseTargetTemperatureChanges();
