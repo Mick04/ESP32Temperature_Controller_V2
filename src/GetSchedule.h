@@ -1,9 +1,9 @@
 // ==================================================
-// File: src/GetShedual.h
+// File: src/GetSchedule.h
 // ==================================================
 
-#ifndef GETSHEDUAL_H
-#define GETSHEDUAL_H
+#ifndef GETSCHEDULE_H
+#define GETSCHEDULE_H
 
 #include <Arduino.h>
 
@@ -45,7 +45,7 @@ void setAMTime(const String &time);
 void setPMTime(const String &time);
 
 // Firebase integration
-void fetchScheduleDataFromFirebase();
+//void fetchScheduleDataFromFirebase();
 //void updateFirebaseScheduleData(const String &path, const String &value);
 float getCurrentScheduledTemperature();
 String formatTime(int hours, int minutes);

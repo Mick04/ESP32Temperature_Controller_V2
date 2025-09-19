@@ -9,7 +9,7 @@
 #include "MQTTManager.h"
 #include "TemperatureSensors.h"
 #include "TimeManager.h"
-#include "GetShedual.h"
+#include "GetSchedule.h"
 #include "HeaterControl.h"
 #include <WiFi.h>
 #include <ArduinoJson.h>

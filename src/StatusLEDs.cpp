@@ -36,19 +36,19 @@ void updateLEDs(SystemStatus &status)
         break;
     }
 
-    // // Set Firebase LED based on status
-    // switch (status.firebase)
-    // {
-    // case FB_CONNECTING:
-    //     leds[LED_FIREBASE] = CRGB::Blue;
-    //     break;
-    // case FB_CONNECTED:
-    //     leds[LED_FIREBASE] = CRGB::Green;
-    //     break;
-    // case FB_ERROR:
-    //     leds[LED_FIREBASE] = CRGB::Red;
-    //     break;
-    // }
+    // Set Firebase LED based on status
+    switch (status.firebase)
+    {
+    case FB_CONNECTING:
+        leds[LED_FIREBASE] = CRGB::Blue;
+        break;
+    case FB_CONNECTED:
+        leds[LED_FIREBASE] = CRGB::Green;
+        break;
+    case FB_ERROR:
+        leds[LED_FIREBASE] = CRGB::Red;
+        break;
+    }
 
     // Set MQTT LED based on status
     switch (status.mqtt)

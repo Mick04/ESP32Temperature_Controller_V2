@@ -1,8 +1,8 @@
 // ==================================================
-// File: src/GetShedual.cpp
+// File: src/GetSchedule.cpp
 // ==================================================
 
-#include "GetShedual.h"
+#include "GetSchedule.h"
 // #include "FirebaseService.h"
 #include "HeaterControl.h"
 // #include <Firebase_ESP_Client.h>

@@ -2,6 +2,7 @@
 #include "Config.h"
 #include "WiFiManagerCustom.h"
 #include "StatusLEDs.h"
+#include "FirebaseService.h"
 #include "TemperatureSensors.h"
 #include "TimeManager.h"
 #include "HeaterControl.h"
@@ -85,6 +86,22 @@ void loop()
   //                start.                     ===
   //==============================================
   handleWiFi(status);
+
+
+  // Handle Firebase connection status (will initialize when WiFi is ready)
+  static bool firebaseInitialized = false;
+  if (status.wifi == CONNECTED && !firebaseInitialized)
+  {
+    // Initialize Firebase immediately after WiFi connection
+    Serial.println("🔥 WiFi connected! Initializing Firebase...");
+    initFirebase(status);
+    firebaseInitialized = true;
+  }
+
+  if (firebaseInitialized)
+  {
+    handleFirebase(status);
+  }
   //===============================================
   //  Check WiFi status and print RSSI value.
   //  this if statement can be moved to WiFiManagerCustom.cpp

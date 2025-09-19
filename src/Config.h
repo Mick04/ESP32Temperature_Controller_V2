@@ -82,9 +82,9 @@ struct SystemStatus
 
 // === LED Index Mapping ===
 #define LED_WIFI 0
-// #define LED_FIREBASE 1
- #define LED_MQTT 2
- #define LED_HEATER 3
+#define LED_FIREBASE 1
+#define LED_MQTT 2
+#define LED_HEATER 3
 
 // #include <FastLED.h>
 

@@ -10,7 +10,7 @@ float getTargetTemp()
 #include <Arduino.h>
 #include "HeaterControl.h"
 #include "TemperatureSensors.h"
-#include "GetShedual.h"
+#include "GetSchedule.h"
 #include "TemperatureSensors.h"
 #include "StatusLEDs.h"
 #include "TimeManager.h"
