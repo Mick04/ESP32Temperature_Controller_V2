@@ -5,6 +5,7 @@
 #include "GetSchedule.h"
 #include "FirebaseService.h"
 #include "HeaterControl.h"
+#include "Globals.h"
 // #include <Firebase_ESP_Client.h>
 
 // Global schedule data instance - no default values
@@ -34,145 +35,161 @@ ScheduleData currentSchedule = {
 // I only want to fetch the schedule data once on startup
 //                        start
 //=======================================================
-// void fetchScheduleDataFromFirebase()
-// {
-//     Serial.println("=== Fetching Schedule Data from Firebase ===");
+void fetchScheduleDataFromFirebase()
+{
+    Serial.println("=== Fetching Schedule Data from Firebase ===");
 
-//     bool allDataRetrieved = true;
+    bool allDataRetrieved = true;
 
-//     // Fetch AM scheduled time
-//     if (Firebase.RTDB.getString(&fbData, "/schedule/amScheduledTime"))
-//     {
-//         String amTime = fbData.stringData();
-//         if (isValidTime(amTime))
-//         {
-//             currentSchedule.amTime = amTime;
-//             Serial.print("✅ AM Time retrieved: ");
-//             Serial.println(amTime);
-//         }
-//         else
-//         {
-//             Serial.println("⚠️  Invalid AM time format - no fallback value");
-//         }
-//     }
-//     else
-//     {
-//         Serial.println("❌ Failed to retrieve AM time from Firebase");
-//         allDataRetrieved = false;
-//     }
+    // Fetch AM scheduled time
+    if (Firebase.RTDB.getString(&fbData, "React/schedule/amScheduledTime"))
+    {
+        String amTime = fbData.stringData();
+        if (isValidTime(amTime))
+        {
+            currentSchedule.amTime = amTime;
+            Serial.print("✅ AM Time retrieved: ");
+            Serial.println(amTime);
+        }
+        else
+        {
+            Serial.println("⚠️  Invalid AM time format - no fallback value");
+        }
+    }
+    else
+    {
+        Serial.println("❌ Failed to retrieve AM time from Firebase");
+        allDataRetrieved = false;
+    }
 
-//     // Fetch PM scheduled time
-//     if (Firebase.RTDB.getString(&fbData, "/schedule/pmScheduledTime"))
-//     {
-//         String pmTime = fbData.stringData();
-//         if (isValidTime(pmTime))
-//         {
-//             currentSchedule.pmTime = pmTime;
-//             Serial.print("✅ PM Time retrieved: ");
-//             Serial.println(pmTime);
-//         }
-//         else
-//         {
-//             Serial.println("⚠️  Invalid PM time format - no fallback value");
-//         }
-//     }
-//     else
-//     {
-//         Serial.println("❌ Failed to retrieve PM time from Firebase");
-//         allDataRetrieved = false;
-//     }
+    // Fetch PM scheduled time
+    if (Firebase.RTDB.getString(&fbData, "React/schedule/pmScheduledTime"))
+    {
+        String pmTime = fbData.stringData();
+        if (isValidTime(pmTime))
+        {
+            currentSchedule.pmTime = pmTime;
+            Serial.print("✅ PM Time retrieved: ");
+            Serial.println(pmTime);
+        }
+        else
+        {
+            Serial.println("⚠️  Invalid PM time format - no fallback value");
+        }
+    }
+    else
+    {
+        Serial.println("❌ Failed to retrieve PM time from Firebase");
+        allDataRetrieved = false;
+    }
 
-//     // Fetch AM temperature (try both string and float formats)
-//     if (Firebase.RTDB.getString(&fbData, "/schedule/amTemperature"))
-//     {
-//         String amTempStr = fbData.stringData();
-//         float amTemp = amTempStr.toFloat();
-//         if (isValidTemperature(amTemp))
-//         {
-//             currentSchedule.amTemp = amTemp;
-//             Serial.print("✅ AM Temperature retrieved: ");
-//             Serial.print(amTemp);
-//             Serial.println("°C");
-//         }
-//         else
-//         {
-//             Serial.println("⚠️  Invalid AM temperature - no fallback value");
-//         }
-//     }
-//     else if (Firebase.RTDB.getFloat(&fbData, "/schedule/amTemperature"))
-//     {
-//         float amTemp = fbData.floatData();
-//         if (isValidTemperature(amTemp))
-//         {
-//             currentSchedule.amTemp = amTemp;
-//             Serial.print("✅ AM Temperature retrieved (float): ");
-//             Serial.print(amTemp);
-//             Serial.println("°C");
-//         }
-//         else
-//         {
-//             Serial.println("⚠️  Invalid AM temperature - no fallback value");
-//         }
-//     }
-//     else
-//     {
-//         Serial.println("❌ Failed to retrieve AM temperature from Firebase");
-//         allDataRetrieved = false;
-//     }
+    // Fetch AM temperature (try both string and float formats)
+    if (Firebase.RTDB.getString(&fbData, "React/schedule/amTemperature"))
+    {
+        String amTempStr = fbData.stringData();
+        float amTemp = amTempStr.toFloat();
+        if (isValidTemperature(amTemp))
+        {
+            currentSchedule.amTemp = amTemp;
+            Serial.print("✅ AM Temperature retrieved: ");
+            Serial.print(amTemp);
+            Serial.println("°C");
+        }
+        else
+        {
+            Serial.println("⚠️  Invalid AM temperature - no fallback value");
+        }
+    }
+    else if (Firebase.RTDB.getFloat(&fbData, "React/schedule/amTemperature"))
+    {
+        float amTemp = fbData.floatData();
+        if (isValidTemperature(amTemp))
+        {
+            currentSchedule.amTemp = amTemp;
+            Serial.print("✅ AM Temperature retrieved (float): ");
+            Serial.print(amTemp);
+            Serial.println("°C");
+        }
+        else
+        {
+            Serial.println("⚠️  Invalid AM temperature - no fallback value");
+        }
+    }
+    else
+    {
+        Serial.println("❌ Failed to retrieve AM temperature from Firebase");
+        allDataRetrieved = false;
+    }
 
-//     // Fetch PM temperature (try both string and float formats)
-//     if (Firebase.RTDB.getString(&fbData, "/schedule/pmTemperature"))
-//     {
-//         String pmTempStr = fbData.stringData();
-//         float pmTemp = pmTempStr.toFloat();
-//         if (isValidTemperature(pmTemp))
-//         {
-//             currentSchedule.pmTemp = pmTemp;
-//             Serial.print("✅ PM Temperature retrieved: ");
-//             Serial.print(pmTemp);
-//             Serial.println("°C");
-//         }
-//         else
-//         {
-//             Serial.println("⚠️  Invalid PM temperature - no fallback value");
-//         }
-//     }
-//     else if (Firebase.RTDB.getFloat(&fbData, "/schedule/pmTemperature"))
-//     {
-//         float pmTemp = fbData.floatData();
-//         if (isValidTemperature(pmTemp))
-//         {
-//             currentSchedule.pmTemp = pmTemp;
-//             Serial.print("✅ PM Temperature retrieved (float): ");
-//             Serial.print(pmTemp);
-//             Serial.println("°C");
-//         }
-//         else
-//         {
-//             Serial.println("⚠️  Invalid PM temperature - no fallback value");
-//         }
-//     }
-//     else
-//     {
-//         Serial.println("❌ Failed to retrieve PM temperature from Firebase");
-//         allDataRetrieved = false;
-//     }
+    // Fetch PM temperature (try both string and float formats)
+    if (Firebase.RTDB.getString(&fbData, "React/schedule/pmTemperature"))
+    {
+        String pmTempStr = fbData.stringData();
+        float pmTemp = pmTempStr.toFloat();
+        if (isValidTemperature(pmTemp))
+        {
+            currentSchedule.pmTemp = pmTemp;
+            Serial.print("✅ PM Temperature retrieved: ");
+            Serial.print(pmTemp);
+            Serial.println("°C");
+        }
+        else
+        {
+            Serial.println("⚠️  Invalid PM temperature - no fallback value");
+        }
+    }
+    else if (Firebase.RTDB.getFloat(&fbData, "React/schedule/pmTemperature"))
+    {
+        float pmTemp = fbData.floatData();
+        if (isValidTemperature(pmTemp))
+        {
+            currentSchedule.pmTemp = pmTemp;
+            Serial.print("✅ PM Temperature retrieved (float): ");
+            Serial.print(pmTemp);
+            Serial.println("°C");
+        }
+        else
+        {
+            Serial.println("⚠️  Invalid PM temperature - no fallback value");
+        }
+    }
+    else
+    {
+        Serial.println("❌ Failed to retrieve PM temperature from Firebase");
+        allDataRetrieved = false;
+    }
 
-//     if (allDataRetrieved)
-//     {
-//         Serial.println("✅ All schedule data retrieved successfully from Firebase");
-//         // Refresh the heater control cache with the new Firebase data
-//         refreshScheduleCache();
-//     }
-//     else
-//     {
-//         Serial.println("⚠️  Some schedule data failed to retrieve - no default values available");
-//     }
+    if (allDataRetrieved)
+    {
+        Serial.println("✅ All schedule data retrieved successfully from Firebase");
+        // Refresh the heater control cache with the new Firebase data
+        refreshScheduleCache();
+    }
+    else
+    {
+        Serial.println("⚠️  Some schedule data failed to retrieve - no default values available");
+    }
+    getTime(); // Ensure time is fetched to parse schedule times correctly
 
-//     // Serial.println("=== Current Schedule Data ===");
-//     // printScheduleData();
-//     // Serial.println("==============================");
-// }
+    if (Hours >= 12){
+        targetTemp = currentSchedule.pmTemp;
+    } else {
+        targetTemp = currentSchedule.amTemp;
+    }
+    Serial.println("===❗️❗️❗️Line 172 fetchScheduleDataFromFirebase ❗️❗️❗️ Schedule Data After Fetch ===");
+    Serial.print("AM Time: ");
+    Serial.println(currentSchedule.amTime);
+    Serial.print("PM Time: ");
+    Serial.println(currentSchedule.pmTime);
+    Serial.print("AM Temperature: ");
+    Serial.println(currentSchedule.amTemp);
+    Serial.print("PM Temperature: ");
+    Serial.println(currentSchedule.pmTemp);
+
+    // Serial.println("=== Current Schedule Data ===");
+    // printScheduleData();
+    // Serial.println("==============================");
+}
 //=======================================================
 // I only want to fetch the schedule data once on startup
 //                        end
@@ -219,7 +236,7 @@ void handleScheduleUpdate(const char *topic, const String &message)
 
                 Serial.println("[DEBUG] setAMTime called from MQTT");
                 setAMTime(amTime);
-                //updateFirebaseScheduleData("/schedule/amScheduledTime", amTime);
+                // updateFirebaseScheduleData("/schedule/amScheduledTime", amTime);
             }
             else
             {
@@ -235,7 +252,7 @@ void handleScheduleUpdate(const char *topic, const String &message)
             {
                 Serial.println("[DEBUG] setPMTime called from MQTT");
                 setPMTime(pmTime);
-                //updateFirebaseScheduleData("/schedule/pmScheduledTime", pmTime);
+                // updateFirebaseScheduleData("/schedule/pmScheduledTime", pmTime);
             }
             else
             {
@@ -251,7 +268,7 @@ void handleScheduleUpdate(const char *topic, const String &message)
             {
                 Serial.println("[DEBUG] setAMTemperature called from MQTT");
                 setAMTemperature(amTemp);
-                //updateFirebaseScheduleData("/schedule/amTemperature", String(amTemp));
+                // updateFirebaseScheduleData("/schedule/amTemperature", String(amTemp));
             }
             else
             {
@@ -267,7 +284,7 @@ void handleScheduleUpdate(const char *topic, const String &message)
             {
                 Serial.println("[DEBUG] setPMTemperature called from MQTT");
                 setPMTemperature(pmTemp);
-                //updateFirebaseScheduleData("/schedule/pmTemperature", String(pmTemp));
+                // updateFirebaseScheduleData("/schedule/pmTemperature", String(pmTemp));
             }
             else
             {
@@ -279,7 +296,7 @@ void handleScheduleUpdate(const char *topic, const String &message)
             Serial.println("❌ Unrecognized schedule control topic");
         }
 
-        //pushTimeToFirebase(currentSchedule.amTime, currentSchedule.pmTime);
+        // pushTimeToFirebase(currentSchedule.amTime, currentSchedule.pmTime);
     }
     // Individual topic handling (AM/PM temperature, time, enabled, scheduledTime)
     if (topicStr.endsWith("/am/temperature"))
@@ -430,7 +447,7 @@ void handleScheduleUpdate(const char *topic, const String &message)
     // Update Firebase if MQTT update was successful
     if (updateSuccessful && firebasePath.length() > 0)
     {
-        //updateFirebaseScheduleData(firebasePath, message);
+        // updateFirebaseScheduleData(firebasePath, message);
     }
 
     // Print updated schedule
@@ -599,8 +616,8 @@ void setPMTime(const String &time)
 float getCurrentScheduledTemperature()
 {
     // Get current time to determine if we should use AM or PM temperature
-    extern int Hours;   // From TimeManager
-    extern bool AmFlag; // From HeaterControl
+    // extern int Hours;   // From TimeManager
+    // extern bool AmFlag; // From HeaterControl
 
     // Use the same logic as heater control to determine AM/PM
     // If AmFlag is true, use AM temperature, otherwise use PM temperature

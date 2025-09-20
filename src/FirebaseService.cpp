@@ -11,8 +11,6 @@
 
 // External variable declarations for debugging
 extern ScheduleData currentSchedule;
-extern bool AmFlag;
-extern int Hours;
 
 // Provide the RTC and API key for RTDB
 FirebaseData fbData; // Made non-static so other files can access it
@@ -118,10 +116,10 @@ void initFirebase(SystemStatus &status)
             }
 
             // // Immediately fetch schedule data from Firebase on startup
-            // Serial.println("🚀 Fetching initial schedule data from Firebase...");
-            // fetchScheduleDataFromFirebase();
-            // initialScheduleFetched = true;
-            // Serial.println("✅ Initial schedule fetch completed. Future updates will come via MQTT.");
+            Serial.println("🚀 Fetching initial schedule data from Firebase...");
+            fetchScheduleDataFromFirebase();
+            initialScheduleFetched = true;
+            Serial.println("✅ Initial schedule fetch completed. Future updates will come via MQTT.");
         }
         else
         {

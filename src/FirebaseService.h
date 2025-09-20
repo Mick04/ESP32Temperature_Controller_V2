@@ -14,6 +14,7 @@ struct SystemStatus;
 void initFirebase(SystemStatus &status);
 void handleFirebase(SystemStatus &status);
 void pushTargetTempToFirebase(float targetTemp);
+void fetchScheduleDataFromFirebase();
 // In FirebaseService.h
 //void pushTimeToFirebase(const String& amTime, const String& pmTime);
 //void pushSensorValuesToFirebase();

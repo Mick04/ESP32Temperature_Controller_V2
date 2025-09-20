@@ -11,6 +11,8 @@
 #define LED_BUILTIN 2 // Most ESP32 boards use GPIO2 for the onboard LED
 #endif
 
+// Use global variables from Globals.h
+#include "Globals.h"
 // Declare global objects for timeClient
 // WiFiUDP ntpUDP; // Commented out to avoid multiple definitions
 // NTPClient timeClient(ntpUDP); // Commented out to avoid multiple definitions
@@ -86,7 +88,6 @@ void loop()
   //                start.                     ===
   //==============================================
   handleWiFi(status);
-
 
   // Handle Firebase connection status (will initialize when WiFi is ready)
   static bool firebaseInitialized = false;

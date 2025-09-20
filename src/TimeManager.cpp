@@ -5,6 +5,7 @@
 // Helper function to calculate the last Sunday of a given month and year
 
 #include "TimeManager.h"
+#include "Globals.h"
 
 int lastSundayOfMonth(int year, int month)
 {

@@ -1,4 +1,4 @@
-static float targetTemp = 0; // persistent across calls
+float targetTemp = 0; // persistent across calls
 float getTargetTemp()
 {
     return targetTemp;
@@ -17,9 +17,11 @@ float getTargetTemp()
 #include "MQTTManager.h"
 #include "FirebaseService.h"
 #include "Config.h"
+#include "Globals.h"
 
 // External declarations
 bool AmFlag = false;
+//float targetTemp = 0.0;
 
 // Global flag to force schedule cache refresh
 static bool forceScheduleRefresh = false;
