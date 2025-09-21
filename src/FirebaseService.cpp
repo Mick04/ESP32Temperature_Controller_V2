@@ -8,17 +8,29 @@
 #include <Firebase_ESP_Client.h>
 #include "TemperatureSensors.h"
 #include "GetSchedule.h"
+#include "FirebaseService.h"
+#include "config.h"
+#include <WiFi.h>
+#include <Firebase_ESP_Client.h>
+#include "TemperatureSensors.h"
+#include "GetSchedule.h"
+#include "MQTTManager.h" // For MQTT client access
+
+// Forward declaration
+void publishFirebaseStatus(const char *status);
 
 // External variable declarations for debugging
 extern ScheduleData currentSchedule;
+
+// Forward declaration of MQTT client
+extern PubSubClient mqttClient;
 
 // Provide the RTC and API key for RTDB
 FirebaseData fbData; // Made non-static so other files can access it
 static FirebaseConfig fbConfig;
 static FirebaseAuth fbAuth;
-static bool fbInitialized = false;
+bool fbInitialized = false;
 static bool initialScheduleFetched = false; // Track initial schedule fetch
-
 
 void initFirebase(SystemStatus &status)
 {
@@ -89,11 +101,14 @@ void initFirebase(SystemStatus &status)
     {
         fbInitialized = true;
         status.firebase = FB_CONNECTED;
+        publishFirebaseStatus("online");
+        // Publish device online/offline status to Firebase
+
         Serial.println("Firebase initialized and connected successfully");
         Serial.println("Test write successful");
 
         // Set device online status in Firebase (LWT-like)
-        //setFirebaseOnlineStatus();
+        // setFirebaseOnlineStatus();
 
         // Now try to read back the data we just wrote
         Serial.println("Testing data retrieval...");
@@ -150,10 +165,36 @@ void initFirebase(SystemStatus &status)
         }
     }
 }
+void publishFirebaseStatus(const char *status)
+{
+    if (!fbInitialized)
+    {
+        Serial.println("Firebase not initialized, cannot publish status");
+        return;
+    }
+    if (Firebase.RTDB.setString(&fbData, "React/firebase/system/status", status))
+    {
+        Serial.print("✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️");
+        if (mqttClient.connected())
+        {
+            mqttClient.publish("React/firebase/system/status", status, true);
+            Serial.println("✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅");
+            Serial.println("✅ Published Firebase status to MQTT");
+        }
+        Serial.print("✅ Firebase system status published: ");
+        Serial.println(status);
+    }
+    else
+    {
+        Serial.println("❌ Failed to publish system status to Firebase");
+        Serial.print("Firebase error: ");
+        Serial.println(fbData.errorReason());
+    }
+}
 void handleFirebase(SystemStatus &status)
 {
     Serial.println(" ");
-    Serial.println("Line 203 FirebaseService.cpp"); 
+    Serial.println("Line 203 FirebaseService.cpp");
     Serial.println("🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 Line 198 handleFirebase...");
     Serial.println(" ");
     // === FIREBASE INITIALIZATION PHASE ===
@@ -217,15 +258,20 @@ void handleFirebase(SystemStatus &status)
         Serial.println("Firebase connection lost");
     }
 }
-void pushTargetTempToFirebase(float targetTemp) {
-    if (!fbInitialized) {
+void pushTargetTempToFirebase(float targetTemp)
+{
+    if (!fbInitialized)
+    {
         Serial.println("Firebase not initialized, cannot push target temperature");
         return;
     }
-    if (Firebase.RTDB.setFloat(&fbData, "ESP32/control/target_temperature", targetTemp)) {
+    if (Firebase.RTDB.setFloat(&fbData, "ESP32/control/target_temperature", targetTemp))
+    {
         Serial.print("✅ Target temperature pushed to Firebase: ");
         Serial.println(targetTemp);
-    } else {
+    }
+    else
+    {
         Serial.println("❌ Failed to push target temperature to Firebase");
         Serial.print("Firebase error: ");
         Serial.println(fbData.errorReason());
@@ -254,5 +300,3 @@ void pushTargetTempToFirebase(float targetTemp) {
 //         Serial.print("Firebase error: ");
 //         Serial.println(fbData.errorReason());
 //     }
-
-

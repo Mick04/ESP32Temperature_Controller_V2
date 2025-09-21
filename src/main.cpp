@@ -1,3 +1,8 @@
+// Track previous connection states for status publishing
+#include "SystemStatusPublisher.h"
+static int prevWifi = -1;
+static int prevMqtt = -1;
+static int prevFirebase = -1;
 #include <Arduino.h>
 #include "Config.h"
 #include "WiFiManagerCustom.h"
@@ -37,7 +42,7 @@ void setup()
   delay(1000); // Wait a moment before proceeding
 
   pinMode(LED_BUILTIN, OUTPUT); // Initialize the BUILTIN_LED pin as an output
-  pinMode(RELAY_PIN, OUTPUT);    // Initialize the RELAY_PIN as an output
+  pinMode(RELAY_PIN, OUTPUT);   // Initialize the RELAY_PIN as an output
 
   Serial.println("✅ Basic hardware initialized");
   delay(1000); // Wait a moment to ensure LEDs are ready
@@ -75,11 +80,27 @@ void setup()
   Serial.println("✅ Time Manager initialized");
   Serial.println("✅ Time Manager initialized");
   Serial.println("✅ Time Manager initialized");
-  delay(1000); // Wait a moment to ensure Time Manager is ready
+  delay(1000);                // Wait a moment to ensure Time Manager is ready
   status.heater = HEATER_OFF; // Start with heater off
 }
 void loop()
 {
+  // Publish Firebase heartbeat every 30 seconds
+  static unsigned long lastHeartbeat = 0;
+  if (millis() - lastHeartbeat > 30000)
+  {
+    publishFirebaseHeartbeat();
+    lastHeartbeat = millis();
+  }
+
+  // Publish status if any connection state changes
+  if (status.wifi != prevWifi || status.mqtt != prevMqtt || status.firebase != prevFirebase)
+  {
+    publishAllSystemStatus(status);
+    prevWifi = status.wifi;
+    prevMqtt = status.mqtt;
+    prevFirebase = status.firebase;
+  }
   // handleWiFi(status);
   digitalWrite(LED_BUILTIN, HIGH); // LED ON
   Serial.println("LED ON");

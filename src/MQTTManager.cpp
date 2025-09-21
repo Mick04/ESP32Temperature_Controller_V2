@@ -14,6 +14,8 @@
 #include <WiFi.h>
 #include <ArduinoJson.h>
 #include "StatusLEDs.h"
+#include "FirebaseService.h" // For Firebase status publishing
+// Firebase status publishing helper is now implemented in FirebaseService.cpp
 
 // Ensure status is available for LED updates
 extern SystemStatus status;
@@ -298,6 +300,9 @@ bool connectToMQTT()
             ))
     {
         Serial.println("MQTT connected successfully!");
+        // Publish MQTT and Firebase online status
+        // publishSingleValue("React/mqtt/system/status", "online, true");
+        // publishFirebaseStatus("online");
 
         // CRITICAL: Re-register callback after connection
         mqttClient.setCallback(onMQTTMessage);
@@ -420,6 +425,9 @@ bool connectToMQTT()
         Serial.print("MQTT connection failed, rc=");
         Serial.print(mqttClient.state());
         Serial.println(" retrying...");
+        // Publish MQTT and Firebase offline status
+        publishSingleValue("React/mqtt/system/status", "offline, true");
+        publishFirebaseStatus("offline");
         return false;
     }
 }
@@ -570,7 +578,7 @@ void publishSystemData()
     publishSingleValue(TOPIC_UPTIME, uptimeStr);
 
     // Publish system status
-    publishSingleValue(TOPIC_STATUS, "online");
+    //publishSingleValue(TOPIC_STATUS, "online");
 
     // Publish heater status as "ON" or "OFF"
     publishSingleValue("esp32/system/heater", status.heater ? "ON" : "OFF");

@@ -49,6 +49,7 @@ bool connectToMQTT();
 void onMQTTMessage(char *topic, byte *payload, unsigned int length);
 void parseAndUpdateScheduleJson(const String &jsonMessage);
 MQTTState getMQTTStatus();
+void publishFirebaseStatus(const char *status);
 void publishSingleValue(const char *topic, float value);
 void publishSingleValue(const char *topic, int value);
 void publishSingleValue(const char *topic, const char *value);

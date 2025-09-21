@@ -4,7 +4,9 @@
 
 #include "StatusLEDs.h"
 #include "Config.h"
+#include "MQTTManager.h" // For MQTT status publishing
 
+extern PubSubClient mqttClient;
 // Define the LED array
 CRGB leds[NUM_LEDS];
 
@@ -14,7 +16,7 @@ void initStatusLEDs()
     FastLED.setBrightness(50); // Set brightness to 50/255
     FastLED.clear();
     leds[LED_HEATER] = CRGB::Black; // Ensure heater LED is off at startup
-    FastLED.show(); // Initial clear
+    FastLED.show();                 // Initial clear
 }
 
 void updateLEDs(SystemStatus &status)
