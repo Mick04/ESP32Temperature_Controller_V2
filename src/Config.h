@@ -86,33 +86,33 @@ struct SystemStatus
 #define LED_MQTT 2
 #define LED_HEATER 3
 
-// #include <FastLED.h>
+#include <FastLED.h>
 
-// // === Other ===
-// #define SENSOR_READ_INTERVAL 1000   // ms
-// #define FIREBASE_SYNC_INTERVAL 5000 // ms
+// === Other ===
+#define SENSOR_READ_INTERVAL 1000   // ms
+#define FIREBASE_SYNC_INTERVAL 5000 // ms
 
-// //=================================================
-// // Hardware for Current Monitoring Configuration
-// //=================================================
+//=================================================
+// Hardware for Current Monitoring Configuration
+//=================================================
 
-// // Calibration Constants
-// #define CALIBRATION_CONSTANT 68.3
-// #define BASELINE_OFFSET 1.75
+// Calibration Constants
+#define CALIBRATION_CONSTANT 68.3
+#define BASELINE_OFFSET 1.75
 
-// // Detection Thresholds
-// #define NOISE_THRESHOLD 0.1
-// #define HEATER_OFF_THRESHOLD 0.40
-// #define HEATER_ON_THRESHOLD 0.60
+// Detection Thresholds
+#define NOISE_THRESHOLD 0.1
+#define HEATER_OFF_THRESHOLD 0.40
+#define HEATER_ON_THRESHOLD 0.45
 
-// // Timing Configuration
-// #define SAMPLES_PER_READING 5000
-// #define LOG_INTERVAL_MINUTES .5
-// #define READING_DELAY_MS 300
+// Timing Configuration
+#define SAMPLES_PER_READING 5000
+#define LOG_INTERVAL_MINUTES .5
+#define READING_DELAY_MS 300
 
-// // Logging Configuration
-// #define LOG_FILE_NAME "/current_log.csv"
-// #define ENABLE_DEBUG_OUTPUT true
+// Logging Configuration
+#define LOG_FILE_NAME "/current_log.csv"
+#define ENABLE_DEBUG_OUTPUT true
 
-// // Function prototypes
-// bool voltageSensor(); // Returns true if heater is drawing current, false if not
+// Function prototypes
+bool voltageSensor(); // Returns true if heater is drawing current, false if not

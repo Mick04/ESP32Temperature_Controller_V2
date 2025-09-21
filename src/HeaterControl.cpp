@@ -111,7 +111,9 @@ void updateHeaterControl(SystemStatus &status)
         status.heater = HEATER_ON;
         publishSystemData();
         updateLEDs(status);
-        Serial.println("🔥 Heater ON - tempRed < targetTemp - HYSTERESIS");
+        voltageSensor(); // Check if heater is drawing current (for safety)
+        Serial.println("🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥");
+        Serial.println("🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥 Heater ON - tempRed < targetTemp - HYSTERESIS");
     } // else, keep current state
 }
 

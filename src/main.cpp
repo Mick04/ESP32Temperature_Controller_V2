@@ -37,6 +37,7 @@ void setup()
   delay(1000); // Wait a moment before proceeding
 
   pinMode(LED_BUILTIN, OUTPUT); // Initialize the BUILTIN_LED pin as an output
+  pinMode(RELAY_PIN, OUTPUT);    // Initialize the RELAY_PIN as an output
 
   Serial.println("✅ Basic hardware initialized");
   delay(1000); // Wait a moment to ensure LEDs are ready
@@ -75,7 +76,7 @@ void setup()
   Serial.println("✅ Time Manager initialized");
   Serial.println("✅ Time Manager initialized");
   delay(1000); // Wait a moment to ensure Time Manager is ready
-  // status.heater = HEATER_OFF; // Start with heater off
+  status.heater = HEATER_OFF; // Start with heater off
 }
 void loop()
 {
