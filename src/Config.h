@@ -60,20 +60,23 @@ struct SystemStatus
 #define MQTT_BROKER_PORT 8884
 #define MQTT_USERNAME "ESP32FireBaseTortoise"
 #define MQTT_PASS "ESP32FireBaseHea1951Ter"
-
-// #define EMAIL_ALERT_ENABLED true // set to false to disable email alerts
-
 // //  === MQTT (HiveMQ) End    ===
 
-// /******************************
-//  *    Email Credentials       *
-//  *****************************/
-// #define SENDER_EMAIL "esp8266heaterapp@gmail.com"
-// #define SENDER_PASSWORD "uuyd ifav mpzd vuoj"
-// #define RECIPIENT_EMAIL "mac5y4@talktalk.net"
-// #define SMTP_HOST "smtp.gmail.com"
-// #define SMTP_PORT 587
+/******************************
+ *    Email Credentials       *
+ *         Start              *
+ *****************************/
+#define SENDER_EMAIL "esp8266heaterapp@gmail.com"
+#define SENDER_PASSWORD "uuyd ifav mpzd vuoj"
+#define RECIPIENT_EMAIL "mac5y4@talktalk.net"
+#define SMTP_HOST "smtp.gmail.com"
+#define SMTP_PORT 587
+#define EMAIL_ALERT_ENABLED true // set to false to disable email alerts
 
+/******************************
+ *    Email Credentials       *
+ *         End                *
+ *******************************/
 // === Pins ===
 #define WS2811_PIN 25         // Pin for WS2811 LED strip
 #define DS18B20_PIN 27        // Pin for DS18B20 temperature sensor (changed from 27)

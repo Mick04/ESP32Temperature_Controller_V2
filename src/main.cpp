@@ -85,6 +85,13 @@ void setup()
 }
 void loop()
 {
+   Serial.println("\n=== ESP32 Temperature Controller Starting ===");
+  Serial.print("Free heap: ");
+  Serial.print(ESP.getFreeHeap());
+  Serial.println(" bytes");
+  Serial.print("Free PSRAM: ");
+  Serial.print(ESP.getFreePsram());
+  Serial.println(" bytes");
   // Publish Firebase heartbeat every 30 seconds
   static unsigned long lastHeartbeat = 0;
   if (millis() - lastHeartbeat > 30000)
