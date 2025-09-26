@@ -15,6 +15,7 @@
 #include "TemperatureSensors.h"
 #include "GetSchedule.h"
 #include "MQTTManager.h" // For MQTT client access
+#include "TimeManager.h" // For time formatting functions
 
 // Forward declaration
 void publishFirebaseStatus(const char *status);
@@ -172,7 +173,8 @@ void publishFirebaseStatus(const char *status)
         Serial.println("Firebase not initialized, cannot publish status");
         return;
     }
-    if (Firebase.RTDB.setString(&fbData, "React/firebase/system/status", status))
+    // if (Firebase.RTDB.setString(&fbData, "React/firebase/system/status", status))
+    if (Firebase.RTDB.setString(&fbData, "ESP32/control", status))
     {
         Serial.print("✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️");
         if (mqttClient.connected())
@@ -366,8 +368,59 @@ void pushSensorDataToFirebase(float tempRed, float tempBlue, float tempGreen) {
     }
     
     // Also store timestamp for when data was last updated
-    String timestamp = String(millis());
+    String timestamp = getFormattedTime();
     if (Firebase.RTDB.setString(&fbData, "ESP32/control/sensors/lastUpdated", timestamp)) {
         Serial.println("✅ Sensor timestamp updated in Firebase");
+    }
+}
+
+
+/**
+ * Push WiFi RSSI values to Firebase Realtime Database
+ * Includes signal strength classification for dashboard
+ */
+void pushRSSIToFirebase(long rssi) {
+    if (!fbInitialized) {
+        Serial.println("Firebase not initialized, cannot push RSSI data");
+        return;
+    }
+    
+    Serial.println("📶 Pushing RSSI data to Firebase...");
+    
+    // Push raw RSSI value
+    if (Firebase.RTDB.setInt(&fbData, "ESP32/control/wifi/rssi", rssi)) {
+        Serial.print("✅ RSSI value pushed to Firebase: ");
+        Serial.println(rssi);
+    } else {
+        Serial.println("❌ Failed to push RSSI to Firebase");
+        Serial.print("Firebase error: ");
+        Serial.println(fbData.errorReason());
+    }
+    
+    // Classify signal strength and push as string for easy dashboard display
+    String signalQuality;
+    if (rssi > -50) {
+        signalQuality = "Excellent";
+    } else if (rssi > -60) {
+        signalQuality = "Very Good";
+    } else if (rssi > -70) {
+        signalQuality = "Good";
+    } else if (rssi > -80) {
+        signalQuality = "Low";
+    } else {
+        signalQuality = "Very Low";
+    }
+    
+    if (Firebase.RTDB.setString(&fbData, "ESP32/control/wifi/signalQuality", signalQuality)) {
+        Serial.print("✅ Signal quality pushed to Firebase: ");
+        Serial.println(signalQuality);
+    } else {
+        Serial.println("❌ Failed to push signal quality to Firebase");
+    }
+    
+    // Also store timestamp for when RSSI was last updated
+    String timestamp = getFormattedTime();
+    if (Firebase.RTDB.setString(&fbData, "ESP32/control/wifi/lastUpdated", timestamp)) {
+        Serial.println("✅ WiFi timestamp updated in Firebase");
     }
 }

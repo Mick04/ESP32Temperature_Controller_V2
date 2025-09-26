@@ -85,7 +85,7 @@ void setup()
 }
 void loop()
 {
-   Serial.println("\n=== ESP32 Temperature Controller Starting ===");
+  Serial.println("\n=== ESP32 Temperature Controller Starting ===");
   Serial.print("Free heap: ");
   Serial.print(ESP.getFreeHeap());
   Serial.println(" bytes");
@@ -140,6 +140,27 @@ void loop()
   if (WiFi.status() == WL_CONNECTED)
   {
     long rssi = WiFi.RSSI();
+
+    // RSSI change detection and Firebase push
+    static long prevRSSI = 0;
+    static bool firstRSSIReading = true;
+    static unsigned long lastRSSIPush = 0;
+
+    // Push RSSI if it changes by 5dBm or more, or every 60 seconds, or first reading
+    if (firstRSSIReading ||
+        abs(rssi - prevRSSI) >= 5 ||
+        millis() - lastRSSIPush > 60000)
+    {
+
+      if (fbInitialized)
+      { // Only push if Firebase is initialized
+        pushRSSIToFirebase(rssi);
+        prevRSSI = rssi;
+        firstRSSIReading = false;
+        lastRSSIPush = millis();
+      }
+    }
+
     Serial.println("===============================");
     Serial.print("WiFi RSSI: ");
     Serial.println(rssi);

@@ -45,8 +45,8 @@ void publishAllSystemStatus(const SystemStatus &status)
     // Also update Firebase RTDB
     if (fbInitialized)
     {
-        Firebase.RTDB.setString(&fbData, "/system/wifi_status", wifiStatus);
-        Firebase.RTDB.setString(&fbData, "/system/mqtt_status", mqttStatus);
-        Firebase.RTDB.setString(&fbData, "/system/firebase_status", fbStatus);
+        Firebase.RTDB.setString(&fbData, "ESP32/control/wifi/wifi", wifiStatus);
+        Firebase.RTDB.setString(&fbData, "ESP32/control/mqtt", mqttStatus);
+        Firebase.RTDB.setString(&fbData, "ESP32/control/firebase", fbStatus);
     }
 }

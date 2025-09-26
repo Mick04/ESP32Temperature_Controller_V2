@@ -19,6 +19,7 @@ void pushTargetTempToFirebase(float targetTemp);
 void fetchScheduleDataFromFirebase();
 void publishFirebaseStatus(const char *status);
 void pushSensorDataToFirebase(float tempRed, float tempBlue, float tempGreen);
+void pushRSSIToFirebase(long rssi);
 // In FirebaseService.h
 // void pushTimeToFirebase(const String& amTime, const String& pmTime);
 // void pushSensorValuesToFirebase();
