@@ -14,7 +14,7 @@
 #include <WiFi.h>
 #include <ArduinoJson.h>
 #include "StatusLEDs.h"
-#include "FirebaseService.h" // For Firebase status publishing
+#include "FirebaseService.h" // For Firebase status publishing and sensor data persistence
 // Firebase status publishing helper is now implemented in FirebaseService.cpp
 
 // Ensure status is available for LED updates
@@ -511,6 +511,9 @@ void publishSensorData()
     {
         publishSingleValue(TOPIC_TEMP_GREEN, "ERROR");
     }
+
+    // Also push sensor data to Firebase for dashboard initialization
+    pushSensorDataToFirebase(tempRed, tempBlue, tempGreen);
     // float targetTemp = getTargetTemp();
     // if (!isnan(targetTemp))
     // {
@@ -578,7 +581,7 @@ void publishSystemData()
     publishSingleValue(TOPIC_UPTIME, uptimeStr);
 
     // Publish system status
-    //publishSingleValue(TOPIC_STATUS, "online");
+    // publishSingleValue(TOPIC_STATUS, "online");
 
     // Publish heater status as "ON" or "OFF"
     publishSingleValue("esp32/system/heater", status.heater ? "ON" : "OFF");

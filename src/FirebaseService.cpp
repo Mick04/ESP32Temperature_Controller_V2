@@ -300,3 +300,74 @@ void pushTargetTempToFirebase(float targetTemp)
 //         Serial.print("Firebase error: ");
 //         Serial.println(fbData.errorReason());
 //     }
+
+
+/**
+ * Push current sensor readings to Firebase Realtime Database
+ * This allows the dashboard to fetch initial values on load
+ */
+void pushSensorDataToFirebase(float tempRed, float tempBlue, float tempGreen) {
+    if (!fbInitialized) {
+        Serial.println("Firebase not initialized, cannot push sensor data");
+        return;
+    }
+    
+    Serial.println("📡 Pushing sensor data to Firebase...");
+    
+    // Push red sensor data
+    if (!isnan(tempRed)) {
+        if (Firebase.RTDB.setFloat(&fbData, "ESP32/control/sensors/tempRed", tempRed)) {
+            Serial.print("✅ Red temperature pushed to Firebase: ");
+            Serial.println(tempRed);
+        } else {
+            Serial.println("❌ Failed to push red temperature to Firebase");
+            Serial.print("Firebase error: ");
+            Serial.println(fbData.errorReason());
+        }
+    } else {
+        // Store "ERROR" for invalid readings
+        if (Firebase.RTDB.setString(&fbData, "ESP32/control/sensors/tempRed", "ERROR")) {
+            Serial.println("✅ Red temperature ERROR pushed to Firebase");
+        }
+    }
+    
+    // Push blue sensor data
+    if (!isnan(tempBlue)) {
+        if (Firebase.RTDB.setFloat(&fbData, "ESP32/control/sensors/tempBlue", tempBlue)) {
+            Serial.print("✅ Blue temperature pushed to Firebase: ");
+            Serial.println(tempBlue);
+        } else {
+            Serial.println("❌ Failed to push blue temperature to Firebase");
+            Serial.print("Firebase error: ");
+            Serial.println(fbData.errorReason());
+        }
+    } else {
+        // Store "ERROR" for invalid readings
+        if (Firebase.RTDB.setString(&fbData, "ESP32/control/sensors/tempBlue", "ERROR")) {
+            Serial.println("✅ Blue temperature ERROR pushed to Firebase");
+        }
+    }
+    
+    // Push green sensor data
+    if (!isnan(tempGreen)) {
+        if (Firebase.RTDB.setFloat(&fbData, "ESP32/control/sensors/tempGreen", tempGreen)) {
+            Serial.print("✅ Green temperature pushed to Firebase: ");
+            Serial.println(tempGreen);
+        } else {
+            Serial.println("❌ Failed to push green temperature to Firebase");
+            Serial.print("Firebase error: ");
+            Serial.println(fbData.errorReason());
+        }
+    } else {
+        // Store "ERROR" for invalid readings
+        if (Firebase.RTDB.setString(&fbData, "ESP32/control/sensors/tempGreen", "ERROR")) {
+            Serial.println("✅ Green temperature ERROR pushed to Firebase");
+        }
+    }
+    
+    // Also store timestamp for when data was last updated
+    String timestamp = String(millis());
+    if (Firebase.RTDB.setString(&fbData, "ESP32/control/sensors/lastUpdated", timestamp)) {
+        Serial.println("✅ Sensor timestamp updated in Firebase");
+    }
+}
