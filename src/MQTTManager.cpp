@@ -196,7 +196,8 @@ void initMQTT()
     clientId = "ESP32_TempController_";
     clientId += String(WiFi.macAddress());
     clientId.replace(":", "");
-    clientId += "_" + String(millis()); // Add timestamp for absolute uniqueness
+    clientId += "_";
+    clientId += String(millis()); // Add timestamp for absolute uniqueness
 
     Serial.print("🆔 MQTT Client ID: ");
     Serial.println(clientId);
