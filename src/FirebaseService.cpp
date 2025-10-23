@@ -35,9 +35,9 @@ static bool initialScheduleFetched = false; // Track initial schedule fetch
 
 void initFirebase(SystemStatus &status)
 {
-    Serial.println("👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺 Line 56 void initFirebase(SystemStatus &status)...");
-    Serial.println(" ");
-    // Initialize only when WiFi connected
+    // Serial.println("👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺 Line 56 void initFirebase(SystemStatus &status)...");
+    // Serial.println(" ");
+    // // Initialize only when WiFi connected
     if (WiFi.status() != WL_CONNECTED)
     {
         status.firebase = FB_CONNECTING;
@@ -48,11 +48,11 @@ void initFirebase(SystemStatus &status)
     Serial.println("Initializing Firebase...");
 
     // Debug print credentials (remove in production)
-    Serial.println("Firebase credentials:");
-    Serial.print("API Key: ");
-    Serial.println(FIREBASE_API_KEY);
-    Serial.print("Database URL: ");
-    Serial.println(FIREBASE_DATABASE_URL);
+    // Serial.println("Firebase credentials:");
+    // Serial.print("API Key: ");
+    // Serial.println(FIREBASE_API_KEY);
+    // Serial.print("Database URL: ");
+    // Serial.println(FIREBASE_DATABASE_URL);
 
     // Clear any previous configuration
     fbConfig = FirebaseConfig();
@@ -78,7 +78,10 @@ void initFirebase(SystemStatus &status)
 
     // Wait for initialization
     delay(3000);
-
+//====================================================
+// This is for debugging only - remove in production =
+//                       Start.                      =
+//====================================================
     // Try anonymous authentication
     Serial.println("Signing in anonymously...");
     if (Firebase.signUp(&fbConfig, &fbAuth, "", ""))
@@ -96,6 +99,7 @@ void initFirebase(SystemStatus &status)
 
     // Test the connection immediately
     Serial.println("Testing Firebase connection...");
+   
 
     // Try to write a simple test value instead of just checking ready()
     if (Firebase.RTDB.setString(&fbData, "/test/connection", "esp32_test"))
@@ -165,40 +169,44 @@ void initFirebase(SystemStatus &status)
             Serial.println(fbData.httpCode());
         }
     }
+     //====================================================
+    // This is for debugging only - remove in production =
+    //                       End.                        =
+    //====================================================
 }
 void publishFirebaseStatus(const char *status)
 {
     if (!fbInitialized)
     {
-        Serial.println("Firebase not initialized, cannot publish status");
+        //Serial.println("Firebase not initialized, cannot publish status");
         return;
     }
     // if (Firebase.RTDB.setString(&fbData, "React/firebase/system/status", status))
     if (Firebase.RTDB.setString(&fbData, "ESP32/control", status))
     {
-        Serial.print("✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️");
+        //Serial.print("✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️");
         if (mqttClient.connected())
         {
             mqttClient.publish("React/firebase/system/status", status, true);
-            Serial.println("✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅");
-            Serial.println("✅ Published Firebase status to MQTT");
+            // Serial.println("✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅");
+            // Serial.println("✅ Published Firebase status to MQTT");
         }
-        Serial.print("✅ Firebase system status published: ");
-        Serial.println(status);
+        // Serial.print("✅ Firebase system status published: ");
+        // Serial.println(status);
     }
     else
     {
-        Serial.println("❌ Failed to publish system status to Firebase");
-        Serial.print("Firebase error: ");
-        Serial.println(fbData.errorReason());
+        // Serial.println("❌ Failed to publish system status to Firebase");
+        // Serial.print("Firebase error: ");
+        // Serial.println(fbData.errorReason());
     }
 }
 void handleFirebase(SystemStatus &status)
 {
-    Serial.println(" ");
-    Serial.println("Line 203 FirebaseService.cpp");
-    Serial.println("🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 Line 198 handleFirebase...");
-    Serial.println(" ");
+    // Serial.println(" ");
+    // Serial.println("Line 203 FirebaseService.cpp");
+    // Serial.println("🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 Line 198 handleFirebase...");
+    // Serial.println(" ");
     // === FIREBASE INITIALIZATION PHASE ===
     // If Firebase hasn't been initialized yet, try to initialize it
     if (!fbInitialized)

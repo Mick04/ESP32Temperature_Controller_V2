@@ -128,25 +128,25 @@ bool checkTemperatureChanges()
 
 void onMQTTMessage(char *topic, unsigned char *payload, unsigned int length)
 {
-    Serial.println("===================================");
-    Serial.println("");
-    Serial.println("🚨🚨🚨 CALLBACK ENTRY POINT HIT! 🚨🚨🚨");
-    Serial.flush();
-    Serial.println("🚨 MQTT CALLBACK TRIGGERED! 🚨");
-    Serial.print("Callback called with topic: ");
-    Serial.println(topic ? topic : "NULL");
-    Serial.print("Payload length: ");
-    Serial.println(length);
-    Serial.flush();
+    // Serial.println("===================================");
+    // Serial.println("");
+    // Serial.println("🚨🚨🚨 CALLBACK ENTRY POINT HIT! 🚨🚨🚨");
+    // Serial.flush();
+    // Serial.println("🚨 MQTT CALLBACK TRIGGERED! 🚨");
+    // Serial.print("Callback called with topic: ");
+    // Serial.println(topic ? topic : "NULL");
+    // Serial.print("Payload length: ");
+    // Serial.println(length);
+    // Serial.flush();
     String message = "";
     for (int i = 0; i < length; i++)
     {
         message += (char)payload[i];
     }
-    Serial.print("MQTT message received on topic: ");
-    Serial.println(topic);
-    Serial.print("*****************Message: ");
-    Serial.println(message);
+    // Serial.print("MQTT message received on topic: ");
+    // Serial.println(topic);
+    // Serial.print("*****************Message: ");
+    // Serial.println(message);
     // Route schedule topics to handleScheduleUpdate
     String topicStr = String(topic);
     topicStr.trim();
@@ -163,18 +163,18 @@ void onMQTTMessage(char *topic, unsigned char *payload, unsigned int length)
         topicStr.endsWith("control/schedule/pm/scheduledtime"))
     {
 
-        Serial.println("[DEBUG] Routing to handleScheduleUpdate...");
-        handleScheduleUpdate(topic, message);
-        Serial.println("💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙");
-        Serial.println("control/schedule/am/temperature");
-        Serial.println(message);
+        // Serial.println("[DEBUG] Routing to handleScheduleUpdate...");
+        // handleScheduleUpdate(topic, message);
+        // Serial.println("💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙");
+        // Serial.println("control/schedule/am/temperature");
+        // Serial.println(message);
     }
     else
     {
-        Serial.println("[DEBUG] Topic not routed to handleScheduleUpdate.");
+        // Serial.println("[DEBUG] Topic not routed to handleScheduleUpdate.");
 
-        Serial.println("===================================");
-        Serial.println("");
+        // Serial.println("===================================");
+        // Serial.println("");
     }
 }
 void initMQTT()

@@ -30,7 +30,7 @@ static bool forceScheduleRefresh = false;
 void updateHeaterControl(SystemStatus &status)
 {
 
-    Serial.println("******************Updating Heater Control...**************");
+   // Serial.println("******************Updating Heater Control...**************");
     // getTime();
     getTime();                               // Updates Hours and Minutes
     String currentTime = getFormattedTime(); // Returns "HH:MM"
@@ -48,31 +48,31 @@ void updateHeaterControl(SystemStatus &status)
     float newTargetTemp = AmFlag ? currentSchedule.amTemp : currentSchedule.pmTemp;
 
     String scheduledTime = AmFlag ? currentSchedule.amTime : currentSchedule.pmTime;
-    Serial.println("😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈");
-    Serial.println("Current Time: " + currentTime);
-    Serial.println("Scheduled Time: " + scheduledTime);
-    Serial.println("================================================");
-    Serial.print("New Target Temp: ");
-    Serial.println(newTargetTemp);
-    Serial.print("Current Target Temp: ");
-    Serial.println(targetTemp);
-    Serial.print("Current Time: ");
-    Serial.println(currentTime);
-    Serial.print("Scheduled Time: ");
-    Serial.println(scheduledTime);
-    Serial.println("😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈");
+    // Serial.println("😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈");
+    // Serial.println("Current Time: " + currentTime);
+    // Serial.println("Scheduled Time: " + scheduledTime);
+    // Serial.println("================================================");
+    // Serial.print("New Target Temp: ");
+    // Serial.println(newTargetTemp);
+    // Serial.print("Current Target Temp: ");
+    // Serial.println(targetTemp);
+    // Serial.print("Current Time: ");
+    // Serial.println(currentTime);
+    // Serial.print("Scheduled Time: ");
+    // Serial.println(scheduledTime);
+    // Serial.println("😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈😈");
     // Only update targetTemp at the scheduled time
     if (scheduledTime == currentTime)
     {
         targetTemp = newTargetTemp;
-        Serial.println("👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺");
-        Serial.println("==================================================");
-        Serial.println("Debug output for target temperature update");
-        Serial.print("newTargetTemp: ");
-        Serial.println(newTargetTemp);
-        Serial.print("Target temperature updated to: ");
-        Serial.println(targetTemp);
-        Serial.println("==================================================");
+       // Serial.println("👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺");
+        // Serial.println("==================================================");
+        // Serial.println("Debug output for target temperature update");
+        // Serial.print("newTargetTemp: ");
+        // Serial.println(newTargetTemp);
+        // Serial.print("Target temperature updated to: ");
+        // Serial.println(targetTemp);
+        // Serial.println("==================================================");
     }
     publishSingleValue("esp32/control/targetTemperature", (float)(round(targetTemp * 10) / 10.0));
     pushTargetTempToFirebase((float)(round(targetTemp * 10) / 10.0)); // // Display current values BEFORE control logic
@@ -92,23 +92,23 @@ void updateHeaterControl(SystemStatus &status)
     // Serial.println("*******************************");
     const float HYSTERESIS = 1; // degrees
     // Check if the current target temperature is valid
-    Serial.println("❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎");
-    Serial.print("Current Target Temperature: ");
-    Serial.println(targetTemp);
-    Serial.print("Current Red Sensor Temperature: ");
-    Serial.println(tempRed);
-    Serial.println("*******************************");
+    // Serial.println("❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎");
+    // Serial.print("Current Target Temperature: ");
+    // Serial.println(targetTemp);
+    // Serial.print("Current Red Sensor Temperature: ");
+    // Serial.println(tempRed);
+    // Serial.println("*******************************");
     if (tempRed > targetTemp + HYSTERESIS)
     {
-        digitalWrite(RELAY_PIN, LOW);
+        digitalWrite(RELAY_PIN, HIGH); // Changed: HIGH = Relay OFF
         status.heater = HEATER_OFF;
         publishSystemData();
         updateLEDs(status);
-        Serial.println("🔥 Heater OFF - tempRed > targetTemp + HYSTERESIS");
+        // Serial.println("🔥 Heater OFF - tempRed > targetTemp + HYSTERESIS");
     }
     else if (tempRed < targetTemp - HYSTERESIS)
     {
-        digitalWrite(RELAY_PIN, HIGH);
+        digitalWrite(RELAY_PIN, LOW); // Changed: LOW = Relay ON
         status.heater = HEATER_ON;
         publishSystemData();
         updateLEDs(status);
@@ -130,9 +130,9 @@ void updateHeaterControl(SystemStatus &status)
                 firstRunE_Mail = true;
             }
 
-            Serial.println("🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥");
-            Serial.println("🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥 currentDetected");
-            Serial.println("🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥 Heater ON - tempRed < targetTemp - HYSTERESIS");
+            // Serial.println("🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥");
+            // Serial.println("🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥 currentDetected");
+            // Serial.println("🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥 Heater ON - tempRed < targetTemp - HYSTERESIS");
         }
         // else
         // {
@@ -140,8 +140,8 @@ void updateHeaterControl(SystemStatus &status)
         //     Serial.println("⚠️  Warning: Heater should be ON but no current detected! Possible issue with heater or wiring.");
         //     Serial.println("⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️");
         //     status.heater = HEATER_ERROR;
-        //     publishSystemData();
-        //     updateLEDs(status);
+             publishSystemData();
+             updateLEDs(status);
         // }
 
     } // else, keep current state

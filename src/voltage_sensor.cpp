@@ -14,11 +14,11 @@ EnergyMonitor emon1;
 // Check if heater is actually drawing current (for safety verification)
 bool voltageSensor()
 {
-    Serial.println("");
+    Serial.println("🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎");
     Serial.println("==============================");
     Serial.println("SCT-013-020 Current Sensor");
     Serial.println("==============================");
-    Serial.println("");
+    Serial.println("🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎");
     // Initialize sensor on first call only (one-time setup)
     static bool initialized = false;
     if (!initialized)
