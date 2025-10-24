@@ -27,13 +27,16 @@ enum MQTTState
     MQTT_STATE_ERROR
 };
 
+// Heater state enumeration for multi-heater detection
 enum HeaterState
 {
-    HEATER_OFF,
-    HEATER_ON,
-    HEATER_ERROR
+    HEATERS_OFF,     // <0.45A - No heaters working
+    ONE_HEATER_ON,   // 1.5-3.0A - One heater working
+    BOTH_HEATERS_ON, // >3.5A - Both heaters working
+    BOTH_HEATERS_BLOWN   // ZERO current reading
 };
 
+// SystemStatus struct definition
 struct SystemStatus
 {
     WiFiState wifi;
@@ -42,6 +45,7 @@ struct SystemStatus
     // Add other status fields as needed
     FirebaseState firebase;
 };
+
 //====WiFi State Management end ===
 
 // === Wi-Fi Start ===
@@ -118,4 +122,7 @@ struct SystemStatus
 #define ENABLE_DEBUG_OUTPUT true
 
 // Function prototypes
-bool voltageSensor(); // Returns true if heater is drawing current, false if not
+bool voltageSensor();       // Returns true if heater is drawing current, false if not
+double getCurrentReading(); // Returns actual current reading for detailed analysis
+
+HeaterState getHeaterState(double current);

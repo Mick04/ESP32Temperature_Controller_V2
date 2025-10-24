@@ -9,6 +9,11 @@
  ************************************/
 void sendEmail(const String &subject, const String &message)
 {
+    Serial.println("📮📮📮📮📮📮📮📮📮📮📮📮📮📮📮📮📮📮📮");
+    Serial.println("");
+    Serial.println("Preparing to send email...");
+    Serial.println("");
+    Serial.println("📮📮📮📮📮📮📮📮📮📮📮📮📮📮📮📮📮📮📮");
     SMTPSession smtp;
     SMTP_Message msg;
 

@@ -3,6 +3,7 @@
 //=====================================
 // Measures current draw from heater to verify operation
 // Uses EmonLib library for RMS current calculation
+// Enhanced to detect multiple heater configurations
 //=====================================
 #include <Arduino.h>
 #include "EmonLib.h"
@@ -47,13 +48,62 @@ bool voltageSensor()
     // Debug output for safety verification can be removed in production
     if (ENABLE_DEBUG_OUTPUT)
     {
-        Serial.print("♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️");
-        Serial.print("Safety Check - Current: ");
+        Serial.println("♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️");
+        Serial.println("Safety Check - Current: ");
         Serial.print(Irms, 3);
-        Serial.print("A, Heater Detected: ");
+        Serial.println("A, Heater Detected: ");
         Serial.println(currentDetected ? "YES" : "NO");
-        Serial.print("♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️");
+        Serial.println("♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️");
     }
 
     return currentDetected; // Return true if heater is drawing current, false if not
+}
+
+// Get current reading for detailed heater analysis
+double getCurrentReading()
+{
+    // Initialize sensor on first call only (one-time setup)
+    static bool initialized = false;
+    if (!initialized)
+    {
+        emon1.current(CURRENT_SENSOR_PIN, CALIBRATION_CONSTANT);
+        initialized = true;
+    }
+
+    // Read RMS current
+    double Irms = emon1.calcIrms(SAMPLES_PER_READING);
+
+    // Apply baseline offset correction
+    Irms -= BASELINE_OFFSET;
+    if (Irms < 0)
+        Irms = 0.0;
+
+    // Filter noise
+    if (Irms < NOISE_THRESHOLD)
+    {
+        Irms = 0.0;
+    }
+
+    return Irms;
+}
+
+// Get detailed heater status based on current draw
+HeaterState getHeaterState(double current)
+{
+    if (current < 0.45)
+    {
+        return BOTH_HEATERS_BLOWN;
+    }
+    else if (current >= 1.5 && current <= 3.0)
+    {
+        return ONE_HEATER_ON;
+    }
+    else if (current > 3.5)
+    {
+        return BOTH_HEATERS_ON;
+    }
+    // else
+    // {
+    //     return HEATER_UNKNOWN;
+    // }
 }

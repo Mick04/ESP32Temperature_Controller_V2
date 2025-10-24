@@ -72,17 +72,17 @@ void updateLEDs(SystemStatus &status)
     // Set Heater LED based on status
     switch (status.heater)
     {
-    case HEATER_OFF:
-        leds[LED_HEATER] = CRGB::Green; // Off
+    case HEATERS_OFF:
+        leds[LED_HEATER] = CRGB::Green; // No heaters running
         break;
-    case HEATER_ON:
-        leds[LED_HEATER] = CRGB::Red; // Heating
+    case ONE_HEATER_ON:
+        leds[LED_HEATER] = CRGB::Orange; // One heater running
         break;
-    // case HEATER_AUTO:
-    //     leds[LED_HEATER] = CRGB::Yellow; // Auto mode
-    //     break;
-    case HEATER_ERROR:
-        leds[LED_HEATER] = CRGB::Red; // Error
+    case BOTH_HEATERS_ON:
+        leds[LED_HEATER] = CRGB::Blue; // Both heaters running
+        break;
+    case BOTH_HEATERS_BLOWN:
+        leds[LED_HEATER] = CRGB::Red; // Both heaters blown
         break;
     }
 
@@ -94,5 +94,10 @@ void showSingleLed(int index, CRGB color)
 {
     // FastLED.clear();
     leds[index] = color;
+    FastLED.show();
+}
+void turnOffLed(int index)
+{
+    leds[index] = CRGB::Black;
     FastLED.show();
 }
