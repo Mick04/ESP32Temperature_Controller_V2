@@ -163,11 +163,11 @@ void onMQTTMessage(char *topic, unsigned char *payload, unsigned int length)
         topicStr.endsWith("control/schedule/pm/scheduledtime"))
     {
 
-        // Serial.println("[DEBUG] Routing to handleScheduleUpdate...");
-        // handleScheduleUpdate(topic, message);
-        // Serial.println("💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙");
-        // Serial.println("control/schedule/am/temperature");
-        // Serial.println(message);
+        Serial.println("[DEBUG] Routing to handleScheduleUpdate...");
+        handleScheduleUpdate(topic, message);
+        Serial.println("💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙");
+        Serial.println("control/schedule/am/temperature");
+        Serial.println(message);
     }
     else
     {

@@ -35,9 +35,7 @@ static bool initialScheduleFetched = false; // Track initial schedule fetch
 
 void initFirebase(SystemStatus &status)
 {
-    // Serial.println("👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺👺 Line 56 void initFirebase(SystemStatus &status)...");
-    // Serial.println(" ");
-    // // Initialize only when WiFi connected
+    // Initialize only when WiFi connected
     if (WiFi.status() != WL_CONNECTED)
     {
         status.firebase = FB_CONNECTING;
@@ -46,13 +44,6 @@ void initFirebase(SystemStatus &status)
     }
 
     Serial.println("Initializing Firebase...");
-
-    // Debug print credentials (remove in production)
-    // Serial.println("Firebase credentials:");
-    // Serial.print("API Key: ");
-    // Serial.println(FIREBASE_API_KEY);
-    // Serial.print("Database URL: ");
-    // Serial.println(FIREBASE_DATABASE_URL);
 
     // Clear any previous configuration
     fbConfig = FirebaseConfig();
@@ -83,92 +74,92 @@ void initFirebase(SystemStatus &status)
 //                       Start.                      =
 //====================================================
     // Try anonymous authentication
-    Serial.println("Signing in anonymously...");
-    if (Firebase.signUp(&fbConfig, &fbAuth, "", ""))
-    {
-        Serial.println("Anonymous sign-up successful");
-    }
-    else
-    {
-        Serial.print("Anonymous sign-up failed: ");
-        Serial.println("Check Firebase project settings for anonymous auth");
-    }
+    // Serial.println("Signing in anonymously...");
+    // if (Firebase.signUp(&fbConfig, &fbAuth, "", ""))
+    // {
+    //     Serial.println("Anonymous sign-up successful");
+    // }
+    // else
+    // {
+    //     Serial.print("Anonymous sign-up failed: ");
+    //     Serial.println("Check Firebase project settings for anonymous auth");
+    // }
 
-    // Wait longer for authentication
-    delay(2000);
+    // // Wait longer for authentication
+    // delay(2000);
 
-    // Test the connection immediately
-    Serial.println("Testing Firebase connection...");
+    // // Test the connection immediately
+    // Serial.println("Testing Firebase connection...");
    
 
-    // Try to write a simple test value instead of just checking ready()
-    if (Firebase.RTDB.setString(&fbData, "/test/connection", "esp32_test"))
-    {
-        fbInitialized = true;
-        status.firebase = FB_CONNECTED;
-        publishFirebaseStatus("online");
-        // Publish device online/offline status to Firebase
+    // // Try to write a simple test value instead of just checking ready()
+    // if (Firebase.RTDB.setString(&fbData, "/test/connection", "esp32_test"))
+    // {
+    //     fbInitialized = true;
+    //     status.firebase = FB_CONNECTED;
+    //     publishFirebaseStatus("online");
+    //     // Publish device online/offline status to Firebase
 
-        Serial.println("Firebase initialized and connected successfully");
-        Serial.println("Test write successful");
+    //     Serial.println("Firebase initialized and connected successfully");
+    //     Serial.println("Test write successful");
 
-        // Set device online status in Firebase (LWT-like)
-        // setFirebaseOnlineStatus();
+    //     // Set device online status in Firebase (LWT-like)
+    //     // setFirebaseOnlineStatus();
 
-        // Now try to read back the data we just wrote
-        Serial.println("Testing data retrieval...");
-        if (Firebase.RTDB.getString(&fbData, "/test/connection"))
-        {
-            String retrievedValue = fbData.stringData();
-            Serial.print("Retrieved value: ");
-            Serial.println(retrievedValue);
+    //     // Now try to read back the data we just wrote
+    //     Serial.println("Testing data retrieval...");
+    //     if (Firebase.RTDB.getString(&fbData, "/test/connection"))
+    //     {
+    //         String retrievedValue = fbData.stringData();
+    //         Serial.print("Retrieved value: ");
+    //         Serial.println(retrievedValue);
 
-            // Test reading a timestamp
-            if (Firebase.RTDB.setTimestamp(&fbData, "/test/last_connection"))
-            {
-                Serial.println("Timestamp written successfully");
-                if (Firebase.RTDB.getInt(&fbData, "/test/last_connection"))
-                {
-                    int timestamp = fbData.intData();
-                    Serial.print("Connection timestamp: ");
-                    Serial.println(timestamp);
-                }
-            }
+    //         // Test reading a timestamp
+    //         if (Firebase.RTDB.setTimestamp(&fbData, "/test/last_connection"))
+    //         {
+    //             Serial.println("Timestamp written successfully");
+    //             if (Firebase.RTDB.getInt(&fbData, "/test/last_connection"))
+    //             {
+    //                 int timestamp = fbData.intData();
+    //                 Serial.print("Connection timestamp: ");
+    //                 Serial.println(timestamp);
+    //             }
+    //         }
 
-            // // Immediately fetch schedule data from Firebase on startup
-            Serial.println("🚀 Fetching initial schedule data from Firebase...");
-            fetchScheduleDataFromFirebase();
-            initialScheduleFetched = true;
-            Serial.println("✅ Initial schedule fetch completed. Future updates will come via MQTT.");
-        }
-        else
-        {
-            Serial.println("Read test failed:");
-            Serial.print("Error: ");
-            Serial.println(fbData.errorReason());
-        }
-    }
-    else
-    {
-        // Try a different approach - check if we can read instead
-        Serial.println("Write failed, trying read test...");
-        if (Firebase.ready())
-        {
-            fbInitialized = true;
-            status.firebase = FB_CONNECTED;
-            Serial.println("Firebase ready - assuming connection is good");
-        }
-        else
-        {
-            // Don't set fbInitialized = false here - we'll try again later
-            status.firebase = FB_ERROR;
-            Serial.println("Firebase initialization failed - will retry later");
-            Serial.print("Error: ");
-            Serial.println(fbData.errorReason());
-            Serial.print("HTTP Code: ");
-            Serial.println(fbData.httpCode());
-        }
-    }
+    //         // // Immediately fetch schedule data from Firebase on startup
+    //         Serial.println("🚀 Fetching initial schedule data from Firebase...");
+    //         fetchScheduleDataFromFirebase();
+    //         initialScheduleFetched = true;
+    //         Serial.println("✅ Initial schedule fetch completed. Future updates will come via MQTT.");
+    //     }
+    //     else
+    //     {
+    //         Serial.println("Read test failed:");
+    //         Serial.print("Error: ");
+    //         Serial.println(fbData.errorReason());
+    //     }
+    // }
+    // else
+    // {
+    //     // Try a different approach - check if we can read instead
+    //     Serial.println("Write failed, trying read test...");
+    //     if (Firebase.ready())
+    //     {
+    //         fbInitialized = true;
+    //         status.firebase = FB_CONNECTED;
+    //         Serial.println("Firebase ready - assuming connection is good");
+    //     }
+    //     else
+    //     {
+    //         // Don't set fbInitialized = false here - we'll try again later
+    //         status.firebase = FB_ERROR;
+    //         Serial.println("Firebase initialization failed - will retry later");
+    //         Serial.print("Error: ");
+    //         Serial.println(fbData.errorReason());
+    //         Serial.print("HTTP Code: ");
+    //         Serial.println(fbData.httpCode());
+    //     }
+    // }
      //====================================================
     // This is for debugging only - remove in production =
     //                       End.                        =
@@ -184,31 +175,14 @@ void publishFirebaseStatus(const char *status)
     // if (Firebase.RTDB.setString(&fbData, "React/firebase/system/status", status))
     if (Firebase.RTDB.setString(&fbData, "ESP32/control", status))
     {
-        //Serial.print("✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️");
         if (mqttClient.connected())
         {
             mqttClient.publish("React/firebase/system/status", status, true);
-            // Serial.println("✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅");
-            // Serial.println("✅ Published Firebase status to MQTT");
-        }
-        // Serial.print("✅ Firebase system status published: ");
-        // Serial.println(status);
-    }
-    else
-    {
-        // Serial.println("❌ Failed to publish system status to Firebase");
-        // Serial.print("Firebase error: ");
-        // Serial.println(fbData.errorReason());
-    }
+        }   
+     }
 }
 void handleFirebase(SystemStatus &status)
 {
-    // Serial.println(" ");
-    // Serial.println("Line 203 FirebaseService.cpp");
-    // Serial.println("🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 Line 198 handleFirebase...");
-    // Serial.println(" ");
-    // === FIREBASE INITIALIZATION PHASE ===
-    // If Firebase hasn't been initialized yet, try to initialize it
     if (!fbInitialized)
     {
         // Only attempt initialization if WiFi is connected

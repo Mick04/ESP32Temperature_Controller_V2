@@ -78,12 +78,12 @@ void setup()
   //  Serial.println("✅ Time Manager initialized");
   //  Serial.println("✅ Time Manager initialized");
   //  Serial.println("✅ Time Manager initialized");
-  delay(1000);                 // Wait a moment to ensure Time Manager is ready
-  //status.heater = HEATERS_OFF; // Start with heater off (updated to new enum)
-turnOffLed(LED_WIFI);      // Turn off WiFi LED (index 0)
-turnOffLed(LED_FIREBASE);  // Turn off Firebase LED (index 1) 
-turnOffLed(LED_MQTT);      // Turn off MQTT LED (index 2)
-turnOffLed(LED_HEATER);    // Turn off Heater LED (index 3)
+  delay(1000); // Wait a moment to ensure Time Manager is ready
+  // status.heater = HEATERS_OFF; // Start with heater off (updated to new enum)
+  turnOffLed(LED_WIFI);     // Turn off WiFi LED (index 0)
+  turnOffLed(LED_FIREBASE); // Turn off Firebase LED (index 1)
+  turnOffLed(LED_MQTT);     // Turn off MQTT LED (index 2)
+  turnOffLed(LED_HEATER);   // Turn off Heater LED (index 3)
 }
 void loop()
 {
@@ -122,12 +122,22 @@ void loop()
 
   // Handle Firebase connection status (will initialize when WiFi is ready)
   static bool firebaseInitialized = false;
+  static bool scheduleDataFetched = false;
   if (status.wifi == CONNECTED && !firebaseInitialized)
   {
     // Initialize Firebase immediately after WiFi connection
     // Serial.println("🔥 WiFi connected! Initializing Firebase...");
     initFirebase(status);
     firebaseInitialized = true;
+  }
+
+  // Fetch schedule data once after Firebase is connected
+  if (firebaseInitialized && status.firebase == FB_CONNECTED && !scheduleDataFetched)
+  {
+    Serial.println("🚀 Fetching initial schedule data from Firebase...");
+    fetchScheduleDataFromFirebase();
+    scheduleDataFetched = true;
+    Serial.println("✅ Initial schedule fetch completed.");
   }
 
   if (firebaseInitialized)
