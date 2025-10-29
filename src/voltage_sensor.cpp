@@ -15,11 +15,6 @@ EnergyMonitor emon1;
 // Check if heater is actually drawing current (for safety verification)
 bool voltageSensor()
 {
-    Serial.println("🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎");
-    Serial.println("==============================");
-    Serial.println("SCT-013-020 Current Sensor");
-    Serial.println("==============================");
-    Serial.println("🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎");
     // Initialize sensor on first call only (one-time setup)
     static bool initialized = false;
     if (!initialized)
@@ -44,18 +39,6 @@ bool voltageSensor()
 
     // Check if heater is drawing current (simplified for safety check)
     bool currentDetected = (Irms > HEATER_ON_THRESHOLD); // Current > 0.45A indicates heater is on
-
-    // Debug output for safety verification can be removed in production
-    if (ENABLE_DEBUG_OUTPUT)
-    {
-        Serial.println("♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️");
-        Serial.println("Safety Check - Current: ");
-        Serial.print(Irms, 3);
-        Serial.println("A, Heater Detected: ");
-        Serial.println(currentDetected ? "YES" : "NO");
-        Serial.println("♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️");
-    }
-
     return currentDetected; // Return true if heater is drawing current, false if not
 }
 
@@ -102,8 +85,4 @@ HeaterState getHeaterState(double current)
     {
         return BOTH_HEATERS_ON;
     }
-    // else
-    // {
-    //     return HEATER_UNKNOWN;
-    // }
 }

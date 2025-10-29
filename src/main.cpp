@@ -18,9 +18,6 @@ static int prevFirebase = -1;
 
 // Use global variables from Globals.h
 #include "Globals.h"
-// Declare global objects for timeClient
-// WiFiUDP ntpUDP; // Commented out to avoid multiple definitions
-// NTPClient timeClient(ntpUDP); // Commented out to avoid multiple definitions
 
 SystemStatus status; // Declare status variable
 void turnOffLed(int index);
@@ -29,21 +26,12 @@ void setup()
 {
 
   Serial.begin(115200);
-  // delay(1000); // Give time for Serial to initialize
-  // Serial.println("\n=== ESP32 Temperature Controller Starting ===");
-  // Serial.print("Free heap: ");
-  // Serial.print(ESP.getFreeHeap());
-  // Serial.println(" bytes");
-  // Serial.print("Free PSRAM: ");
-  // Serial.print(ESP.getFreePsram());
-  // Serial.println(" bytes");
   delay(1000); // Wait a moment before proceeding
 
   pinMode(LED_BUILTIN, OUTPUT);  // Initialize the BUILTIN_LED pin as an output
   pinMode(RELAY_PIN, OUTPUT);    // Initialize the RELAY_PIN as an output
   digitalWrite(RELAY_PIN, HIGH); // Relay OFF (HIGH = OFF for active-low relay)
-  // Serial.println("✅ Basic hardware initialized");
-  delay(1000); // Wait a moment to ensure LEDs are ready
+  delay(1000);                   // Wait a moment to ensure LEDs are ready
 
   initStatusLEDs(); // Initialize Status LEDs
 
@@ -53,48 +41,21 @@ void setup()
   turnOffLed(LED_MQTT);     // Turn off MQTT LED (index 2)
   turnOffLed(LED_HEATER);   // Turn off Heater LED (index 3)
 
-  // Serial.println("✅ Status LEDs initialized");
   delay(1000); // Wait a moment to ensure LEDs are ready
 
   status.wifi = CONNECTING; // Initial WiFi status
-
-  Serial.println("✅ WiFi initialization started");
-
-  initWiFi(status); // Initialize WiFi
-
+  initWiFi(status);         // Initialize WiFi
   initTemperatureSensors(); // Initialize Temperature Sensors
 
-  // Serial.println("✅ Temperature sensors initialized");
   delay(1000); // Wait a moment to ensure sensors are ready
-
-  delay(1000); // Wait a moment to ensure LEDs are ready
 
   timeClient.begin();
   getTime(); // Initialize Time Manager
 
-  // Serial.println("✅ Time Manager initialized");
-  //  Serial.print("Hours ");
-  //  Serial.print(Hours);
-  //  Serial.print(": Minutes ");
-  //  Serial.println(Minutes);
-  //  Serial.print("currentDay ");
-  //  Serial.print(currentDay);
-  //  Serial.print(": currentMonth ");
-  //  Serial.println(currentMonth);
-  //  Serial.println("✅ Time Manager initialized");
-  //  Serial.println("✅ Time Manager initialized");
-  //  Serial.println("✅ Time Manager initialized");
   delay(1000); // Wait a moment to ensure Time Manager is ready
 }
 void loop()
 {
-  // Serial.println("\n=== ESP32 Temperature Controller Starting ===");
-  // Serial.print("Free heap: ");
-  // Serial.print(ESP.getFreeHeap());
-  // Serial.println(" bytes");
-  // Serial.print("Free PSRAM: ");
-  // Serial.print(ESP.getFreePsram());
-  // Serial.println(" bytes");
   // Publish Firebase heartbeat every 30 seconds
   static unsigned long lastHeartbeat = 0;
   if (millis() - lastHeartbeat > 30000)
@@ -113,8 +74,7 @@ void loop()
   }
   // handleWiFi(status);
   digitalWrite(LED_BUILTIN, HIGH); // LED ON
-  Serial.println("LED ON");
-  delay(500); // Wait 500ms
+  delay(500);                      // Wait 500ms
   //==============================================
   //.           Wi-Fi Status Check.            ===
   //                start.                     ===
@@ -126,8 +86,6 @@ void loop()
   static bool scheduleDataFetched = false;
   if (status.wifi == CONNECTED && !firebaseInitialized)
   {
-    // Initialize Firebase immediately after WiFi connection
-    // Serial.println("🔥 WiFi connected! Initializing Firebase...");
     initFirebase(status);
     firebaseInitialized = true;
   }
@@ -135,10 +93,8 @@ void loop()
   // Fetch schedule data once after Firebase is connected
   if (firebaseInitialized && status.firebase == FB_CONNECTED && !scheduleDataFetched)
   {
-    Serial.println("🚀 Fetching initial schedule data from Firebase...");
     fetchScheduleDataFromFirebase();
     scheduleDataFetched = true;
-    Serial.println("✅ Initial schedule fetch completed.");
   }
 
   if (firebaseInitialized)
@@ -174,51 +130,15 @@ void loop()
       }
     }
 
-    Serial.println("===============================");
-    Serial.print("WiFi RSSI: ");
-    Serial.println(rssi);
-    Serial.println("**********************");
-    Serial.println(" ");
     digitalWrite(LED_BUILTIN, LOW); // LED OFF
-    Serial.println("LED OFF");
-    delay(500); // Wait 500ms
+    delay(500);                     // Wait 500ms
+  }
 
-    // Serial.prints can be deleted when programming is complete
-    Serial.println("===============================");
-    if (rssi > -50)
-    {
-      Serial.println("🎉🎉🎉Excellent signal strength");
-    }
-    else if (rssi > -60)
-    {
-      Serial.println("🌞 Very good signal strength");
-    }
-    else if (rssi > -70)
-    {
-      Serial.println("🌼 Good signal strength");
-    }
-    else if (rssi > -80)
-    {
-      Serial.println("🌸 Low signal strength");
-    }
-    else
-    {
-      Serial.println("🌑 Very low signal strength");
-    }
-    Serial.println("==============================");
-    Serial.println("   ");
-  }
-  else
-  {
-    Serial.println("WiFi is not connected.");
-  }
   //==============================================
   //.           Wi-Fi Status Check.            ===
   //                end.                       ===
   //==============================================
 
-  Serial.println("Looping...");
-  Serial.print("WiFi Status: ");
   /*************************************
    * Get the temperature from sensors  *
    *     This will be moved to         *
@@ -236,12 +156,8 @@ void loop()
     // Check if any temperature values have changed
     if (checkTemperatureChanges())
     {
-      // Serial.println("\n=== MQTT Publish (Temperature Change Detected) ===");
-
       // Publish sensor data (includes time and system data)
       publishSensorData();
-
-      // Serial.println("=== End MQTT Publish ===\n");
     }
 
     lastMQTTCheck = millis();

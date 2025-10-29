@@ -21,9 +21,6 @@ void initStatusLEDs()
 
 void updateLEDs(SystemStatus &status)
 {
-    // Clear all LEDs first
-    // FastLED.clear();
-
     // Set WiFi LED based on status
     switch (status.wifi)
     {

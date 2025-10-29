@@ -23,11 +23,7 @@ void handleWiFi(SystemStatus &status)
     {
         if (status.wifi != CONNECTED)
         {
-            Serial.println("WiFi connected");
             long rssi = WiFi.RSSI();
-            Serial.print("Signal strength (RSSI): ");
-            Serial.print(rssi);
-            Serial.println(" dBm");
         }
         status.wifi = CONNECTED;
         updateLEDs(status);
