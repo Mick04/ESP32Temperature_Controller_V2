@@ -72,17 +72,20 @@ void updateLEDs(SystemStatus &status)
     // Set Heater LED based on status
     switch (status.heater)
     {
+        case HEATER_STARTUP:
+        leds[LED_HEATER] = CRGB::Black; // Startup state
+        break;
     case HEATERS_OFF:
-        leds[LED_HEATER] = CRGB::Green; // No heaters running
+        leds[LED_HEATER] = CRGB::Green; // No heaters running - LED off
         break;
     case ONE_HEATER_ON:
         leds[LED_HEATER] = CRGB::Orange; // One heater running
         break;
     case BOTH_HEATERS_ON:
-        leds[LED_HEATER] = CRGB::Blue; // Both heaters running
+        leds[LED_HEATER] = CRGB::Red; // Both heaters running normally
         break;
     case BOTH_HEATERS_BLOWN:
-        leds[LED_HEATER] = CRGB::Red; // Both heaters blown
+        leds[LED_HEATER] = CRGB::Blue; // Both heaters blown - error
         break;
     }
 

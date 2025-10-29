@@ -98,8 +98,8 @@ void updateHeaterControl(SystemStatus &status)
     // Serial.print(tempRed);
     // Serial.println("°C");
     // Serial.println("*******************************");
-    const float HYSTERESIS = 1; // degrees
-                                // Check if the current target temperature is valid
+    const float HYSTERESIS = 2.0; // degrees - Increased from 0.1 to compensate for 300W thermal overshoot
+                                  // Check if the current target temperature is valid
     Serial.println("❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎");
     // Serial.print("Current Target Temperature: ");
     // Serial.println(targetTemp);
@@ -120,8 +120,15 @@ void updateHeaterControl(SystemStatus &status)
         digitalWrite(RELAY_PIN, HIGH); // Changed: HIGH = Relay OFF
         status.heater = HEATERS_OFF;   // Update to use new enum
         publishSystemData();
+        Serial.println("♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️");
+        Serial.println("heater status set to HEATERS_OFF");
+        Serial.print("status.heater enum value: ");
+        Serial.print(status.heater);
+        Serial.print(" (");
+        Serial.println(")");
+        Serial.println("♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️");
         updateLEDs(status);
-        // Serial.println("🔥 Heater OFF - tempRed > targetTemp + HYSTERESIS");
+        Serial.println("🔥 Heater OFF - tempRed > targetTemp + HYSTERESIS");
     }
 
     else if (tempRed < targetTemp - HYSTERESIS)
@@ -131,14 +138,13 @@ void updateHeaterControl(SystemStatus &status)
         // Use current sensor to determine actual heater state
 
         // status.heater = getHeaterState(currentReading);
-        status.heater = BOTH_HEATERS_ON;   // Update to use new enum
+        status.heater = BOTH_HEATERS_ON; // Update to use new enum
+        updateLEDs(status);
         double currentReading = getCurrentReading(); // Get current reading for heater state analysis
-
         HeaterState heaterState = getHeaterState(currentReading);
         Serial.println("currentReading (A): ");
         Serial.println(currentReading);
         publishSystemData();
-        updateLEDs(status);
 
         // Enhanced heater failure detection with multi-heater support
         unsigned long now = millis(); // Declare now here so it's available for all conditions
@@ -147,7 +153,6 @@ void updateHeaterControl(SystemStatus &status)
         Serial.println("Heater State : ");
         Serial.println(heaterState);
         Serial.println("🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥 ");
-        
 
         if (heaterState == ONE_HEATER_ON)
         {
@@ -206,40 +211,23 @@ void updateHeaterControl(SystemStatus &status)
 
         // Debug output
         Serial.print("🔥 Heater Status: ");
-        switch (heaterState)
-        {
-        case HEATERS_OFF:
-            Serial.println("NO HEATERS NORMAL");
-            break;
-        case ONE_HEATER_ON:
-            Serial.println("ONE HEATER");
-            break;
-        case BOTH_HEATERS_ON:
-            Serial.println("BOTH HEATERS");
-            break;
-        case BOTH_HEATERS_BLOWN:
-            Serial.println("BOTH HEATERS BLOWN");
-            break;
-        }
-    }
-    else
-    {
+
         // Heaters working properly - reset failure flags when current is detected
         firstRunSingleFailure = true;
         firstRunTotalFailure = true;
         Serial.println("✅ Heaters operating normally");
-    }
-    // else
-    // {
-    //     Serial.println("⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️ ");
-    //     Serial.println("⚠️  Warning: Heater should be ON but no current detected! Possible issue with heater or wiring.");
-    //     Serial.println("⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️");
-    //     status.heater = HEATER_ERROR;
-    publishSystemData();
-    updateLEDs(status);
-    // }
+    } // End of else if (tempRed < targetTemp - HYSTERESIS) block
+    else
+    {
+        // Temperature is within hysteresis band - maintain current state
+        Serial.println("🌡️ Temperature within hysteresis band - maintaining current relay state");
+        publishSystemData();
 
-} // else, keep current state
+        updateLEDs(status);
+
+    } // End of main temperature control if-else structure
+
+} // End of updateHeaterControl function
 
 // // Function to refresh the cached schedule values
 // // Call this whenever schedule data is updated via MQTT

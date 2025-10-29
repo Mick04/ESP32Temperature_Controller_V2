@@ -30,6 +30,7 @@ enum MQTTState
 // Heater state enumeration for multi-heater detection
 enum HeaterState
 {
+    HEATER_STARTUP,   // Initial state during startup
     HEATERS_OFF,     // <0.45A - No heaters working
     ONE_HEATER_ON,   // 1.5-3.0A - One heater working
     BOTH_HEATERS_ON, // >3.5A - Both heaters working
