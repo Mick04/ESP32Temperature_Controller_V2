@@ -171,9 +171,12 @@ void fetchScheduleDataFromFirebase()
     }
     getTime(); // Ensure time is fetched to parse schedule times correctly
 
-    if (Hours >= 12){
+    if (Hours >= 12)
+    {
         targetTemp = currentSchedule.pmTemp;
-    } else {
+    }
+    else
+    {
         targetTemp = currentSchedule.amTemp;
     }
     Serial.println("===❗️❗️❗️Line 172 fetchScheduleDataFromFirebase ❗️❗️❗️ Schedule Data After Fetch ===");
@@ -240,7 +243,7 @@ void handleScheduleUpdate(const char *topic, const String &message)
             }
             else
             {
-               // Serial.println("[DEBUG] amTime from MQTT is invalid");
+                // Serial.println("[DEBUG] amTime from MQTT is invalid");
             }
         }
         else if (topicStr == "pm/scheduledtime")
@@ -256,7 +259,7 @@ void handleScheduleUpdate(const char *topic, const String &message)
             }
             else
             {
-               // Serial.println("[DEBUG] pmTime from MQTT is invalid");
+                // Serial.println("[DEBUG] pmTime from MQTT is invalid");
             }
         }
         else if (topicStr == "am/temperature")
@@ -266,13 +269,13 @@ void handleScheduleUpdate(const char *topic, const String &message)
             // Serial.println(amTemp);
             if (isValidTemperature(amTemp))
             {
-              //  Serial.println("[DEBUG] setAMTemperature called from MQTT");
+                //  Serial.println("[DEBUG] setAMTemperature called from MQTT");
                 setAMTemperature(amTemp);
                 // updateFirebaseScheduleData("/schedule/amTemperature", String(amTemp));
             }
             else
             {
-               // Serial.println("[DEBUG] amTemp from MQTT is invalid");
+                // Serial.println("[DEBUG] amTemp from MQTT is invalid");
             }
         }
         else if (topicStr == "pm/temperature")
@@ -322,11 +325,11 @@ void handleScheduleUpdate(const char *topic, const String &message)
             setPMTemperature(temp);
             updateSuccessful = true;
             firebasePath = "/schedule/pmTemperature";
-            // Serial.println("✅ PM Temperature updated via MQTT");
+            Serial.println("✅ PM Temperature updated via MQTT");
         }
         else
         {
-            // Serial.println("❌ Invalid PM temperature received via MQTT");
+            Serial.println("❌ Invalid PM temperature received via MQTT");
         }
     }
     else if (topicStr.endsWith("/am/time"))
@@ -336,11 +339,11 @@ void handleScheduleUpdate(const char *topic, const String &message)
             setAMTime(message);
             updateSuccessful = true;
             firebasePath = "/schedule/amScheduledTime";
-            // Serial.println("✅ AM Time updated via MQTT");
+            Serial.println("✅ AM Time updated via MQTT");
         }
         else
         {
-            // Serial.println("❌ Invalid AM time format received via MQTT");
+            Serial.println("❌ Invalid AM time format received via MQTT");
         }
     }
     else if (topicStr.endsWith("/pm/time"))
@@ -350,11 +353,11 @@ void handleScheduleUpdate(const char *topic, const String &message)
             setPMTime(message);
             updateSuccessful = true;
             firebasePath = "/schedule/pmScheduledTime";
-            // Serial.println("✅ PM Time updated via MQTT");
+            Serial.println("✅ PM Time updated via MQTT");
         }
         else
         {
-            // Serial.println("❌ Invalid PM time format received via MQTT");
+            Serial.println("❌ Invalid PM time format received via MQTT");
         }
     }
     // else if (topicStr.endsWith("/am/enabled"))
@@ -441,7 +444,8 @@ void handleScheduleUpdate(const char *topic, const String &message)
     }
     else
     {
-        // Serial.println("⚠️  Unknown schedule topic received");
+        Serial.print("⚠️  Unknown schedule topic received: ");
+        Serial.println(topicStr);
     }
 
     // Update Firebase if MQTT update was successful
@@ -514,7 +518,7 @@ float getAMTemperature()
 {
     if (isnan(currentSchedule.amTemp))
     {
-        //Serial.println("⚠️  Warning: AM Temperature not set - returning NaN");
+        // Serial.println("⚠️  Warning: AM Temperature not set - returning NaN");
     }
     return currentSchedule.amTemp;
 }
@@ -523,7 +527,7 @@ float getPMTemperature()
 {
     if (isnan(currentSchedule.pmTemp))
     {
-        //Serial.println("⚠️  Warning: PM Temperature not set - returning NaN");
+        // Serial.println("⚠️  Warning: PM Temperature not set - returning NaN");
     }
     return currentSchedule.pmTemp;
 }
@@ -532,7 +536,7 @@ String getAMTime()
 {
     if (currentSchedule.amTime.length() == 0)
     {
-        //Serial.println("⚠️  Warning: AM Time not set - returning empty string");
+        // Serial.println("⚠️  Warning: AM Time not set - returning empty string");
     }
     return currentSchedule.amTime;
 }
@@ -541,7 +545,7 @@ String getPMTime()
 {
     if (currentSchedule.pmTime.length() == 0)
     {
-        //Serial.println("⚠️  Warning: PM Time not set - returning empty string");
+        // Serial.println("⚠️  Warning: PM Time not set - returning empty string");
     }
     return currentSchedule.pmTime;
 }
@@ -549,67 +553,67 @@ String getPMTime()
 // Setter functions
 void setAMTemperature(float temp)
 {
-    //Serial.print("[DEBUG] setAMTemperature called with value: ");
-    //Serial.println(temp);
+    // Serial.print("[DEBUG] setAMTemperature called with value: ");
+    // Serial.println(temp);
     if (isValidTemperature(temp))
     {
         currentSchedule.amTemp = temp;
-        //Serial.print("🔄 AM Temperature set to: ");
-        //Serial.print(temp);
-       // Serial.println("°C");
+        // Serial.print("🔄 AM Temperature set to: ");
+        // Serial.print(temp);
+        // Serial.println("°C");
     }
     else
     {
-        //Serial.println("❌ Invalid AM temperature provided");
+        // Serial.println("❌ Invalid AM temperature provided");
     }
 }
 
 void setPMTemperature(float temp)
 {
-    //Serial.print("[DEBUG] setPMTemperature called with value: ");
-    //Serial.println(temp);
+    // Serial.print("[DEBUG] setPMTemperature called with value: ");
+    // Serial.println(temp);
     if (isValidTemperature(temp))
     {
         currentSchedule.pmTemp = temp;
-        //Serial.print("🔄 PM Temperature set to: ");
-        //Serial.print(temp);
-        //Serial.println("°C");
+        // Serial.print("🔄 PM Temperature set to: ");
+        // Serial.print(temp);
+        // Serial.println("°C");
     }
     else
     {
-        //Serial.println("❌ Invalid PM temperature provided");
+        // Serial.println("❌ Invalid PM temperature provided");
     }
 }
 
 void setAMTime(const String &time)
 {
-    //Serial.print("[DEBUG] setAMTime called with value: ");
-    //Serial.println(time);
+    // Serial.print("[DEBUG] setAMTime called with value: ");
+    // Serial.println(time);
     if (isValidTime(time))
     {
         currentSchedule.amTime = time;
-        //Serial.print("🔄 AM Time set to: ");
-        //Serial.println(time);
+        // Serial.print("🔄 AM Time set to: ");
+        // Serial.println(time);
     }
     else
     {
-        //Serial.println("❌ Invalid AM time format provided");
+        // Serial.println("❌ Invalid AM time format provided");
     }
 }
 
 void setPMTime(const String &time)
 {
-    //Serial.print("[DEBUG] setPMTime called with value: ");
-    //Serial.println(time);
+    // Serial.print("[DEBUG] setPMTime called with value: ");
+    // Serial.println(time);
     if (isValidTime(time))
     {
         currentSchedule.pmTime = time;
-        //Serial.print("🔄 PM Time set to: ");
-        //Serial.println(time);
+        // Serial.print("🔄 PM Time set to: ");
+        // Serial.println(time);
     }
     else
     {
-        //Serial.println("❌ Invalid PM time format provided");
+        // Serial.println("❌ Invalid PM time format provided");
     }
 }
 
@@ -629,7 +633,7 @@ float getCurrentScheduledTemperature()
         }
         else
         {
-            //Serial.println("⚠️  Warning: AM temperature not available");
+            // Serial.println("⚠️  Warning: AM temperature not available");
             return NAN;
         }
     }
@@ -641,7 +645,7 @@ float getCurrentScheduledTemperature()
         }
         else
         {
-            //Serial.println("⚠️  Warning: PM temperature not available");
+            // Serial.println("⚠️  Warning: PM temperature not available");
             return NAN;
         }
     }

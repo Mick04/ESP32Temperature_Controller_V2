@@ -47,6 +47,12 @@ void setup()
 
   initStatusLEDs(); // Initialize Status LEDs
 
+    // status.heater = HEATERS_OFF; // Start with heater off (updated to new enum)
+  turnOffLed(LED_WIFI);     // Turn off WiFi LED (index 0)
+  turnOffLed(LED_FIREBASE); // Turn off Firebase LED (index 1)
+  turnOffLed(LED_MQTT);     // Turn off MQTT LED (index 2)
+  turnOffLed(LED_HEATER);   // Turn off Heater LED (index 3)
+
   // Serial.println("✅ Status LEDs initialized");
   delay(1000); // Wait a moment to ensure LEDs are ready
 
@@ -79,11 +85,7 @@ void setup()
   //  Serial.println("✅ Time Manager initialized");
   //  Serial.println("✅ Time Manager initialized");
   delay(1000); // Wait a moment to ensure Time Manager is ready
-  // status.heater = HEATERS_OFF; // Start with heater off (updated to new enum)
-  turnOffLed(LED_WIFI);     // Turn off WiFi LED (index 0)
-  turnOffLed(LED_FIREBASE); // Turn off Firebase LED (index 1)
-  turnOffLed(LED_MQTT);     // Turn off MQTT LED (index 2)
-  turnOffLed(LED_HEATER);   // Turn off Heater LED (index 3)
+
 }
 void loop()
 {

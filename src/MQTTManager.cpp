@@ -151,6 +151,16 @@ void onMQTTMessage(char *topic, unsigned char *payload, unsigned int length)
     String topicStr = String(topic);
     topicStr.trim();
     topicStr.toLowerCase();
+
+    // Debug: Show what topic we received
+    Serial.print("🔍 MQTT Topic received: '");
+    Serial.print(topic);
+    Serial.print("' -> normalized: '");
+    Serial.print(topicStr);
+    Serial.print("' Message: '");
+    Serial.print(message);
+    Serial.println("'");
+
     if (
         topicStr.endsWith("control/schedule") ||
         topicStr.endsWith("control/schedule/am/temperature") ||
@@ -160,14 +170,19 @@ void onMQTTMessage(char *topic, unsigned char *payload, unsigned int length)
         topicStr.endsWith("control/schedule/pm/hour") ||
         topicStr.endsWith("control/schedule/pm/minute") ||
         topicStr.endsWith("control/schedule/pm/enabled") ||
-        topicStr.endsWith("control/schedule/pm/scheduledtime"))
+        topicStr.endsWith("control/schedule/pm/scheduledtime") ||
+        // Add Firebase-style schedule topics
+        topicStr.endsWith("schedule/amtemperature") ||
+        topicStr.endsWith("schedule/pmtemperature") ||
+        topicStr.endsWith("schedule/amscheduledtime") ||
+        topicStr.endsWith("schedule/pmscheduledtime") ||
+        topicStr.endsWith("schedule/amenabled") ||
+        topicStr.endsWith("schedule/pmenabled"))
     {
 
         Serial.println("[DEBUG] Routing to handleScheduleUpdate...");
         handleScheduleUpdate(topic, message);
-        Serial.println("💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙");
-        Serial.println("control/schedule/am/temperature");
-        Serial.println(message);
+        Serial.println("✅ handleScheduleUpdate() called successfully");
     }
     else
     {
@@ -364,6 +379,16 @@ bool connectToMQTT()
         else
         {
             Serial.println("❌ Failed to subscribe to " TOPIC_CONTROL_PM_TIME);
+        }
+
+        // Subscribe to React schedule topics that match Firebase structure
+        if (mqttClient.subscribe("React/schedule/+", 1))
+        {
+            Serial.println("✅ Subscribed to React/schedule/+ (QoS 1)");
+        }
+        else
+        {
+            Serial.println("❌ Failed to subscribe to React/schedule/+");
         }
 
         // //Subscribe to JSON schedule updates with QoS 1
@@ -584,6 +609,26 @@ void publishSystemData()
     // Publish system status
     // publishSingleValue(TOPIC_STATUS, "online");
 
-    // Publish heater status as "ON" or "OFF"
-    publishSingleValue("esp32/system/heater", status.heater ? "ON" : "OFF");
+    // Publish heater status based on enum value
+    const char *heaterStatus;
+    switch (status.heater)
+    {
+    case HEATER_STARTUP:
+        heaterStatus = "STARTUP";
+        break;
+    case HEATERS_OFF:
+        heaterStatus = "OFF";
+        break;
+    case ONE_HEATER_ON:
+    case BOTH_HEATERS_ON:
+        heaterStatus = "ON";
+        break;
+    case BOTH_HEATERS_BLOWN:
+        heaterStatus = "ERROR";
+        break;
+    default:
+        heaterStatus = "UNKNOWN";
+        break;
+    }
+    publishSingleValue("esp32/system/heater", heaterStatus);
 }

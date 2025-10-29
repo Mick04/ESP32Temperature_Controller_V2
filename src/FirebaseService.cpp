@@ -16,6 +16,7 @@
 #include "GetSchedule.h"
 #include "MQTTManager.h" // For MQTT client access
 #include "TimeManager.h" // For time formatting functions
+#include "StatusLEDs.h"  // For LED status updates
 
 // Forward declaration
 void publishFirebaseStatus(const char *status);
@@ -39,6 +40,7 @@ void initFirebase(SystemStatus &status)
     if (WiFi.status() != WL_CONNECTED)
     {
         status.firebase = FB_CONNECTING;
+        updateLEDs(status);
         Serial.println("WiFi not connected, cannot initialize Firebase");
         return;
     }
@@ -69,107 +71,99 @@ void initFirebase(SystemStatus &status)
 
     // Wait for initialization
     delay(3000);
-//====================================================
-// This is for debugging only - remove in production =
-//                       Start.                      =
-//====================================================
+
     // Try anonymous authentication
-    // Serial.println("Signing in anonymously...");
-    // if (Firebase.signUp(&fbConfig, &fbAuth, "", ""))
-    // {
-    //     Serial.println("Anonymous sign-up successful");
-    // }
-    // else
-    // {
-    //     Serial.print("Anonymous sign-up failed: ");
-    //     Serial.println("Check Firebase project settings for anonymous auth");
-    // }
+    Serial.println("Signing in anonymously...");
+    if (Firebase.signUp(&fbConfig, &fbAuth, "", ""))
+    {
+        Serial.println("Anonymous sign-up successful");
+    }
+    else
+    {
+        Serial.print("Anonymous sign-up failed: ");
+        Serial.println("Check Firebase project settings for anonymous auth");
+    }
 
-    // // Wait longer for authentication
-    // delay(2000);
+    // Wait longer for authentication
+    delay(2000);
 
-    // // Test the connection immediately
-    // Serial.println("Testing Firebase connection...");
-   
+    // Test the connection immediately
+    Serial.println("Testing Firebase connection...");
 
-    // // Try to write a simple test value instead of just checking ready()
-    // if (Firebase.RTDB.setString(&fbData, "/test/connection", "esp32_test"))
-    // {
-    //     fbInitialized = true;
-    //     status.firebase = FB_CONNECTED;
-    //     publishFirebaseStatus("online");
-    //     // Publish device online/offline status to Firebase
+    // Try to write a simple test value instead of just checking ready()
+    if (Firebase.RTDB.setString(&fbData, "/test/connection", "esp32_test"))
+    {
+        fbInitialized = true;
+        status.firebase = FB_CONNECTED;
+        publishFirebaseStatus("online");
+        // Publish device online/offline status to Firebase
 
-    //     Serial.println("Firebase initialized and connected successfully");
-    //     Serial.println("Test write successful");
+        Serial.println("Firebase initialized and connected successfully");
+        Serial.println("Test write successful");
 
-    //     // Set device online status in Firebase (LWT-like)
-    //     // setFirebaseOnlineStatus();
+        // Set device online status in Firebase (LWT-like)
+        // setFirebaseOnlineStatus();
 
-    //     // Now try to read back the data we just wrote
-    //     Serial.println("Testing data retrieval...");
-    //     if (Firebase.RTDB.getString(&fbData, "/test/connection"))
-    //     {
-    //         String retrievedValue = fbData.stringData();
-    //         Serial.print("Retrieved value: ");
-    //         Serial.println(retrievedValue);
+        // Now try to read back the data we just wrote
+        Serial.println("Testing data retrieval...");
+        if (Firebase.RTDB.getString(&fbData, "/test/connection"))
+        {
+            String retrievedValue = fbData.stringData();
+            Serial.print("Retrieved value: ");
+            Serial.println(retrievedValue);
 
-    //         // Test reading a timestamp
-    //         if (Firebase.RTDB.setTimestamp(&fbData, "/test/last_connection"))
-    //         {
-    //             Serial.println("Timestamp written successfully");
-    //             if (Firebase.RTDB.getInt(&fbData, "/test/last_connection"))
-    //             {
-    //                 int timestamp = fbData.intData();
-    //                 Serial.print("Connection timestamp: ");
-    //                 Serial.println(timestamp);
-    //             }
-    //         }
+            // Test reading a timestamp
+            if (Firebase.RTDB.setTimestamp(&fbData, "/test/last_connection"))
+            {
+                Serial.println("Timestamp written successfully");
+                if (Firebase.RTDB.getInt(&fbData, "/test/last_connection"))
+                {
+                    int timestamp = fbData.intData();
+                    Serial.print("Connection timestamp: ");
+                    Serial.println(timestamp);
+                }
+            }
 
-    //         // // Immediately fetch schedule data from Firebase on startup
-    //         Serial.println("🚀 Fetching initial schedule data from Firebase...");
-    //         fetchScheduleDataFromFirebase();
-    //         initialScheduleFetched = true;
-    //         Serial.println("✅ Initial schedule fetch completed. Future updates will come via MQTT.");
-    //     }
-    //     else
-    //     {
-    //         Serial.println("Read test failed:");
-    //         Serial.print("Error: ");
-    //         Serial.println(fbData.errorReason());
-    //     }
-    // }
-    // else
-    // {
-    //     // Try a different approach - check if we can read instead
-    //     Serial.println("Write failed, trying read test...");
-    //     if (Firebase.ready())
-    //     {
-    //         fbInitialized = true;
-    //         status.firebase = FB_CONNECTED;
-    //         Serial.println("Firebase ready - assuming connection is good");
-    //     }
-    //     else
-    //     {
-    //         // Don't set fbInitialized = false here - we'll try again later
-    //         status.firebase = FB_ERROR;
-    //         Serial.println("Firebase initialization failed - will retry later");
-    //         Serial.print("Error: ");
-    //         Serial.println(fbData.errorReason());
-    //         Serial.print("HTTP Code: ");
-    //         Serial.println(fbData.httpCode());
-    //     }
-    // }
-     //====================================================
-    // This is for debugging only - remove in production =
-    //                       End.                        =
-    //====================================================
+            // Immediately fetch schedule data from Firebase on startup
+            Serial.println("🚀 Fetching initial schedule data from Firebase...");
+            fetchScheduleDataFromFirebase();
+            initialScheduleFetched = true;
+            Serial.println("✅ Initial schedule fetch completed. Future updates will come via MQTT.");
+        }
+        else
+        {
+            Serial.println("Read test failed:");
+            Serial.print("Error: ");
+            Serial.println(fbData.errorReason());
+        }
+    }
+    else
+    {
+        // Try a different approach - check if we can read instead
+        Serial.println("Write failed, trying read test...");
+        if (Firebase.ready())
+        {
+            fbInitialized = true;
+            status.firebase = FB_CONNECTED;
+            Serial.println("Firebase ready - assuming connection is good");
+        }
+        else
+        {
+            // Don't set fbInitialized = false here - we'll try again later
+            status.firebase = FB_ERROR;
+            Serial.println("Firebase initialization failed - will retry later");
+            Serial.print("Error: ");
+            Serial.println(fbData.errorReason());
+            Serial.print("HTTP Code: ");
+            Serial.println(fbData.httpCode());
+        }
+    }
 }
 void publishFirebaseStatus(const char *status)
 {
     if (!fbInitialized)
     {
-        //Serial.println("Firebase not initialized, cannot publish status");
+        // Serial.println("Firebase not initialized, cannot publish status");
         return;
     }
     // if (Firebase.RTDB.setString(&fbData, "React/firebase/system/status", status))
@@ -178,8 +172,8 @@ void publishFirebaseStatus(const char *status)
         if (mqttClient.connected())
         {
             mqttClient.publish("React/firebase/system/status", status, true);
-        }   
-     }
+        }
+    }
 }
 void handleFirebase(SystemStatus &status)
 {
@@ -188,6 +182,7 @@ void handleFirebase(SystemStatus &status)
         // Only attempt initialization if WiFi is connected
         if (WiFi.status() == WL_CONNECTED)
         {
+            updateLEDs(status);
             // Rate limit initialization attempts to avoid spam (every 30 seconds)
             static unsigned long lastInitAttempt = 0;
             if (millis() - lastInitAttempt > 30000)
@@ -201,7 +196,7 @@ void handleFirebase(SystemStatus &status)
         {
             // WiFi not connected - set status and wait
             status.firebase = FB_CONNECTING;
-
+            updateLEDs(status);
             // Only print this message occasionally to avoid spam (every 5 seconds)
             static unsigned long lastWiFiMessage = 0;
             if (millis() - lastWiFiMessage > 5000)
@@ -234,11 +229,13 @@ void handleFirebase(SystemStatus &status)
             Serial.println("Firebase connected successfully");
         }
         status.firebase = FB_CONNECTED;
+        updateLEDs(status);
     }
     else
     {
         // Firebase connection is down
         status.firebase = FB_ERROR;
+        updateLEDs(status);
         Serial.println("Firebase connection lost");
     }
 }
@@ -285,124 +282,164 @@ void pushTargetTempToFirebase(float targetTemp)
 //         Serial.println(fbData.errorReason());
 //     }
 
-
 /**
  * Push current sensor readings to Firebase Realtime Database
  * This allows the dashboard to fetch initial values on load
  */
-void pushSensorDataToFirebase(float tempRed, float tempBlue, float tempGreen) {
-    if (!fbInitialized) {
+void pushSensorDataToFirebase(float tempRed, float tempBlue, float tempGreen)
+{
+    if (!fbInitialized)
+    {
         Serial.println("Firebase not initialized, cannot push sensor data");
         return;
     }
-    
+
     Serial.println("📡 Pushing sensor data to Firebase...");
-    
+
     // Push red sensor data
-    if (!isnan(tempRed)) {
-        if (Firebase.RTDB.setFloat(&fbData, "ESP32/control/sensors/tempRed", tempRed)) {
+    if (!isnan(tempRed))
+    {
+        if (Firebase.RTDB.setFloat(&fbData, "ESP32/control/sensors/tempRed", tempRed))
+        {
             Serial.print("✅ Red temperature pushed to Firebase: ");
             Serial.println(tempRed);
-        } else {
+        }
+        else
+        {
             Serial.println("❌ Failed to push red temperature to Firebase");
             Serial.print("Firebase error: ");
             Serial.println(fbData.errorReason());
         }
-    } else {
+    }
+    else
+    {
         // Store "ERROR" for invalid readings
-        if (Firebase.RTDB.setString(&fbData, "ESP32/control/sensors/tempRed", "ERROR")) {
+        if (Firebase.RTDB.setString(&fbData, "ESP32/control/sensors/tempRed", "ERROR"))
+        {
             Serial.println("✅ Red temperature ERROR pushed to Firebase");
         }
     }
-    
+
     // Push blue sensor data
-    if (!isnan(tempBlue)) {
-        if (Firebase.RTDB.setFloat(&fbData, "ESP32/control/sensors/tempBlue", tempBlue)) {
+    if (!isnan(tempBlue))
+    {
+        if (Firebase.RTDB.setFloat(&fbData, "ESP32/control/sensors/tempBlue", tempBlue))
+        {
             Serial.print("✅ Blue temperature pushed to Firebase: ");
             Serial.println(tempBlue);
-        } else {
+        }
+        else
+        {
             Serial.println("❌ Failed to push blue temperature to Firebase");
             Serial.print("Firebase error: ");
             Serial.println(fbData.errorReason());
         }
-    } else {
+    }
+    else
+    {
         // Store "ERROR" for invalid readings
-        if (Firebase.RTDB.setString(&fbData, "ESP32/control/sensors/tempBlue", "ERROR")) {
+        if (Firebase.RTDB.setString(&fbData, "ESP32/control/sensors/tempBlue", "ERROR"))
+        {
             Serial.println("✅ Blue temperature ERROR pushed to Firebase");
         }
     }
-    
+
     // Push green sensor data
-    if (!isnan(tempGreen)) {
-        if (Firebase.RTDB.setFloat(&fbData, "ESP32/control/sensors/tempGreen", tempGreen)) {
+    if (!isnan(tempGreen))
+    {
+        if (Firebase.RTDB.setFloat(&fbData, "ESP32/control/sensors/tempGreen", tempGreen))
+        {
             Serial.print("✅ Green temperature pushed to Firebase: ");
             Serial.println(tempGreen);
-        } else {
+        }
+        else
+        {
             Serial.println("❌ Failed to push green temperature to Firebase");
             Serial.print("Firebase error: ");
             Serial.println(fbData.errorReason());
         }
-    } else {
+    }
+    else
+    {
         // Store "ERROR" for invalid readings
-        if (Firebase.RTDB.setString(&fbData, "ESP32/control/sensors/tempGreen", "ERROR")) {
+        if (Firebase.RTDB.setString(&fbData, "ESP32/control/sensors/tempGreen", "ERROR"))
+        {
             Serial.println("✅ Green temperature ERROR pushed to Firebase");
         }
     }
-    
+
     // Also store timestamp for when data was last updated
     String timestamp = getFormattedTime();
-    if (Firebase.RTDB.setString(&fbData, "ESP32/control/sensors/lastUpdated", timestamp)) {
+    if (Firebase.RTDB.setString(&fbData, "ESP32/control/sensors/lastUpdated", timestamp))
+    {
         Serial.println("✅ Sensor timestamp updated in Firebase");
     }
 }
-
 
 /**
  * Push WiFi RSSI values to Firebase Realtime Database
  * Includes signal strength classification for dashboard
  */
-void pushRSSIToFirebase(long rssi) {
-    if (!fbInitialized) {
+void pushRSSIToFirebase(long rssi)
+{
+    if (!fbInitialized)
+    {
         Serial.println("Firebase not initialized, cannot push RSSI data");
         return;
     }
-    
+
     Serial.println("📶 Pushing RSSI data to Firebase...");
-    
+
     // Push raw RSSI value
-    if (Firebase.RTDB.setInt(&fbData, "ESP32/control/wifi/rssi", rssi)) {
+    if (Firebase.RTDB.setInt(&fbData, "ESP32/control/wifi/rssi", rssi))
+    {
         Serial.print("✅ RSSI value pushed to Firebase: ");
         Serial.println(rssi);
-    } else {
+    }
+    else
+    {
         Serial.println("❌ Failed to push RSSI to Firebase");
         Serial.print("Firebase error: ");
         Serial.println(fbData.errorReason());
     }
-    
+
     // Classify signal strength and push as string for easy dashboard display
     String signalQuality;
-    if (rssi > -50) {
+    if (rssi > -50)
+    {
         signalQuality = "Excellent";
-    } else if (rssi > -60) {
+    }
+    else if (rssi > -60)
+    {
         signalQuality = "Very Good";
-    } else if (rssi > -70) {
+    }
+    else if (rssi > -70)
+    {
         signalQuality = "Good";
-    } else if (rssi > -80) {
+    }
+    else if (rssi > -80)
+    {
         signalQuality = "Low";
-    } else {
+    }
+    else
+    {
         signalQuality = "Very Low";
     }
-    
-    if (Firebase.RTDB.setString(&fbData, "ESP32/control/wifi/signalQuality", signalQuality)) {
+
+    if (Firebase.RTDB.setString(&fbData, "ESP32/control/wifi/signalQuality", signalQuality))
+    {
         Serial.print("✅ Signal quality pushed to Firebase: ");
         Serial.println(signalQuality);
-    } else {
+    }
+    else
+    {
         Serial.println("❌ Failed to push signal quality to Firebase");
     }
-    
+
     // Also store timestamp for when RSSI was last updated
     String timestamp = getFormattedTime();
-    if (Firebase.RTDB.setString(&fbData, "ESP32/control/wifi/lastUpdated", timestamp)) {
+    if (Firebase.RTDB.setString(&fbData, "ESP32/control/wifi/lastUpdated", timestamp))
+    {
         Serial.println("✅ WiFi timestamp updated in Firebase");
     }
 }
