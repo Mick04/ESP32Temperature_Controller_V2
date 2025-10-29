@@ -68,8 +68,8 @@ void updateHeaterControl(SystemStatus &status)
     }
     publishSingleValue("esp32/control/targetTemperature", (float)(round(targetTemp * 10) / 10.0));
     pushTargetTempToFirebase((float)(round(targetTemp * 10) / 10.0)); // // Display current values BEFORE control logic
-    const float HYSTERESIS = .0; // degrees - Increased from 0.1 to compensate for 300W thermal overshoot
-    
+    const float HYSTERESIS = 0.5;                                     // degrees - Balanced for responsive control while preventing oscillation
+
     // Check if the current target temperature is valid
 
     if (tempRed > targetTemp + HYSTERESIS)

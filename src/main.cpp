@@ -148,11 +148,16 @@ void loop()
    ************************************/
   // If MQTT is connected, check for temperature changes and publish when needed
   static unsigned long lastMQTTCheck = 0;
-  if (status.mqtt == MQTT_STATE_CONNECTED && millis() - lastMQTTCheck > 5000) // Check every 5 seconds
+  if (status.mqtt == MQTT_STATE_CONNECTED && millis() - lastMQTTCheck > 1000) // Check every 1 second for faster response
   {
     // Read all temperature sensors first
     readAllSensors();
-
+static bool firstReading = true;
+if (firstReading) {
+    firstReading = false;
+    status.heater = HEATERS_OFF;
+     updateLEDs(status); // Ensure LEDs are updated on first reading
+}
     // Check if any temperature values have changed
     if (checkTemperatureChanges())
     {

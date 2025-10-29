@@ -82,9 +82,9 @@ bool checkTemperatureChanges()
     float tempBlue = getTemperature(1);  // Blue sensor
     float tempGreen = getTemperature(2); // Green sensor
     bool hasChanged = firstReading ||
-                      (abs(tempRed - prevTempRed) > .5 && !isnan(tempRed)) ||
-                      (abs(tempBlue - prevTempBlue) > .5 && !isnan(tempBlue)) ||
-                      (abs(tempGreen - prevTempGreen) > .5 && !isnan(tempGreen)) ||
+                      (abs(tempRed - prevTempRed) > 0.2 && !isnan(tempRed)) ||
+                      (abs(tempBlue - prevTempBlue) > 0.2 && !isnan(tempBlue)) ||
+                      (abs(tempGreen - prevTempGreen) > 0.2 && !isnan(tempGreen)) ||
                       (isnan(tempRed) != isnan(prevTempRed)) ||
                       (isnan(tempBlue) != isnan(prevTempBlue)) ||
                       (isnan(tempGreen) != isnan(prevTempGreen));
