@@ -85,7 +85,6 @@ void setup()
   //  Serial.println("✅ Time Manager initialized");
   //  Serial.println("✅ Time Manager initialized");
   delay(1000); // Wait a moment to ensure Time Manager is ready
-
 }
 void loop()
 {

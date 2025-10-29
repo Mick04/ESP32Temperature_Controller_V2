@@ -98,7 +98,7 @@ void updateHeaterControl(SystemStatus &status)
     // Serial.print(tempRed);
     // Serial.println("°C");
     // Serial.println("*******************************");
-    const float HYSTERESIS = 2.0; // degrees - Increased from 0.1 to compensate for 300W thermal overshoot
+    const float HYSTERESIS = .0; // degrees - Increased from 0.1 to compensate for 300W thermal overshoot
                                   // Check if the current target temperature is valid
     Serial.println("❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎❎");
     // Serial.print("Current Target Temperature: ");
