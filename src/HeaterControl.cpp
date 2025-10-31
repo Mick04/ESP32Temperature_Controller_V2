@@ -86,7 +86,7 @@ void updateHeaterControl(SystemStatus &status)
 
         // Use current sensor to determine actual heater state
 
-        // status.heater = getHeaterState(currentReading);
+        //status.heater = getHeaterState(currentReading);
         status.heater = BOTH_HEATERS_ON; // Update to use new enum
         updateLEDs(status);
         double currentReading = getCurrentReading(); // Get current reading for heater state analysis
