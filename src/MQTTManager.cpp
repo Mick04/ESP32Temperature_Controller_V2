@@ -402,11 +402,13 @@ void publishSystemData()
         heaterStatus = "OFF";
         break;
     case ONE_HEATER_ON:
+        heaterStatus = "ONE_ON";
+        break;
     case BOTH_HEATERS_ON:
         heaterStatus = "ON";
         break;
     case BOTH_HEATERS_BLOWN:
-        heaterStatus = "ERROR";
+        heaterStatus = "BOTH_BLOWN";
         break;
     default:
         heaterStatus = "UNKNOWN";

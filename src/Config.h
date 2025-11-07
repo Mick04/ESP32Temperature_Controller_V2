@@ -30,11 +30,11 @@ enum MQTTState
 // Heater state enumeration for multi-heater detection
 enum HeaterState
 {
-    HEATER_STARTUP,   // Initial state during startup
-    HEATERS_OFF,     // <0.45A - No heaters working
-    ONE_HEATER_ON,   // 1.5-3.0A - One heater working
-    BOTH_HEATERS_ON, // >3.5A - Both heaters working
-    BOTH_HEATERS_BLOWN   // ZERO current reading
+    HEATER_STARTUP,    // Initial state during startup
+    HEATERS_OFF,       // <0.45A - No heaters working
+    ONE_HEATER_ON,     // 1.5-3.0A - One heater working
+    BOTH_HEATERS_ON,   // >3.5A - Both heaters working
+    BOTH_HEATERS_BLOWN // ZERO current reading
 };
 
 // SystemStatus struct definition
@@ -104,11 +104,11 @@ struct SystemStatus
 // Hardware for Current Monitoring Configuration
 //=================================================
 
-// Calibration Constants
+// Calibration Constants - Updated for 2×100W heaters
 #define CALIBRATION_CONSTANT 68.3
-#define BASELINE_OFFSET 1.75
+#define BASELINE_OFFSET 0.3 // Reduced from 1.75 to match actual readings
 
-// Detection Thresholds
+// Detection Thresholds - Updated for 100W heaters
 #define NOISE_THRESHOLD 0.1
 #define HEATER_OFF_THRESHOLD 0.40
 #define HEATER_ON_THRESHOLD 0.45
