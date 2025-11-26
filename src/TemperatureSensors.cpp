@@ -21,6 +21,28 @@ void initTemperatureSensors()
     sensors.getAddress(red, 0);
     sensors.getAddress(blue, 1);
     sensors.getAddress(green, 2);
+    Serial.print("Connected Temperature Sensors: ");
+    Serial.println(connectedSensors);
+    Serial.print("Red Sensor Address: ");
+    for (uint8_t i = 0; i < 8; i++) {
+        if (red[i] < 16) Serial.print("0");
+        Serial.print(red[i], HEX);
+    }
+    Serial.println();
+
+    Serial.print("Blue Sensor Address: ");
+    for (uint8_t i = 0; i < 8; i++) {
+        if (blue[i] < 16) Serial.print("0");
+        Serial.print(blue[i], HEX);
+    }
+    Serial.println();
+
+    Serial.print("Green Sensor Address: ");
+    for (uint8_t i = 0; i < 8; i++) {
+        if (green[i] < 16) Serial.print("0");
+        Serial.print(green[i], HEX);
+    }
+    Serial.println();
 }
 
 /**************************************

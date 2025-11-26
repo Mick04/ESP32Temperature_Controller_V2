@@ -351,7 +351,11 @@ void publishSensorData()
 
     // Also push sensor data to Firebase for dashboard initialization
     pushSensorDataToFirebase(tempRed, tempBlue, tempGreen); // Publish dummy current data (until current sensor is implemented)
-    float dummyCurrent = random(0, 100) / 10.0;             // Random current 0-10A
+
+    // Store historical data every 5 minutes for charting
+    storeHistoricalDataIfNeeded(tempRed, tempBlue, tempGreen);
+
+    float dummyCurrent = random(0, 100) / 10.0; // Random current 0-10A
     publishSingleValue(TOPIC_CURRENT, dummyCurrent);
 
     // Also publish time and system data when temperature changes

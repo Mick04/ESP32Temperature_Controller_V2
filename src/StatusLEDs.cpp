@@ -73,7 +73,7 @@ void updateLEDs(SystemStatus &status)
         leds[LED_HEATER] = CRGB::Black; // Startup state
         break;
     case HEATERS_OFF:
-        leds[LED_HEATER] = CRGB::Green; // No heaters running - LED off
+        leds[LED_HEATER] = CRGB::Green; // No heaters running - LED Green
         break;
     case ONE_HEATER_ON:
         leds[LED_HEATER] = CRGB::Orange; // One heater running

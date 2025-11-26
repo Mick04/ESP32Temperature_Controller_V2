@@ -28,10 +28,10 @@ bool AmFlag = false;
 static bool forceScheduleRefresh = false;
 
 // Multi-heater failure detection state variables
-static bool firstRunSingleFailure = true;
-static bool firstRunLowCurrentFailure = true; // Separate flag for 1.91A case
-static bool firstRunTotalFailure = true;
-static unsigned long lastSingleFailureEmail = 0;
+static bool first_Run_Single_Failure = true;
+static bool first_Run_Low_Current_Failure = true; // Separate flag for 1.91A case
+static bool first_Run_Total_Failure = true;
+static unsigned long last_Single_Failure_Email = 0;
 static unsigned long lastLowCurrentFailureEmail = 0; // Separate timer for 1.91A case
 static unsigned long lastTotalFailureEmail = 0;
 static HeaterState lastKnownState = BOTH_HEATERS_ON; // Assume both working initially
@@ -51,7 +51,7 @@ void updateHeaterControl(SystemStatus &status)
         AmFlag = false;
     }
     readAllSensors();
-    float tempRed = getTemperature(0); // Before the if statement
+    float tempRed = getTemperature(0); // Get the value of the Red sensor
 
     float newTargetTemp = AmFlag ? currentSchedule.amTemp : currentSchedule.pmTemp;
 
@@ -81,7 +81,7 @@ void updateHeaterControl(SystemStatus &status)
         status.heater = HEATERS_OFF;   // Update to use new enum
         publishSystemData();
         updateLEDs(status);
-        // Don't reset firstRunSingleFailure here - let it persist for 30-minute reminders
+        // Don't reset first_Run_Single_Failure here - let it persist for 30-minute reminders
     }
 
     // else if (tempRed < targetTemp - HYSTERESIS)
@@ -113,11 +113,19 @@ void updateHeaterControl(SystemStatus &status)
             Serial.println(" A");
 
             // Special case: Current around 1.91A indicates heater failure - send periodic emails
-            if (currentReading >= 1.85 && currentReading <= 2.0)
-            {
-                if (firstRunLowCurrentFailure)
+            // if (currentReading >= 1.85 && currentReading <= 2.0)
+            // {
+            //     // Debug timing information for low current failure
+            //     Serial.print("⚠️ Low current failure detected. Time since last email: ");
+            //     Serial.print((now - lastLowCurrentFailureEmail) / 1000);
+            //     Serial.println(" seconds");
+            //     Serial.print("First run flag: ");
+            //     Serial.println(first_Run_Low_Current_Failure ? "true" : "false");
+
+                if (first_Run_Low_Current_Failure)
                 {
-                    firstRunLowCurrentFailure = false;
+                    Serial.println("Sending FIRST low current failure email");
+                    first_Run_Low_Current_Failure = false;
                     lastLowCurrentFailureEmail = now;
                     char message[200];
                     sprintf(message, "Heater failure detected. Current: %.2fA (abnormally low). Check heater connections and operation.", currentReading);
@@ -126,12 +134,18 @@ void updateHeaterControl(SystemStatus &status)
                 // Check if 30 minutes have passed since last email attempt
                 else if (now - lastLowCurrentFailureEmail >= 1800000UL)
                 {
+                    Serial.println("30 minutes elapsed - sending repeat low current failure email");
                     lastLowCurrentFailureEmail = now; // Update timestamp regardless of email success
                     char message[200];
                     sprintf(message, "Heater failure detected. Current: %.2fA (abnormally low). Check heater connections and operation.", currentReading);
                     sendEmail("WARNING: Heater Failure - Low Current", message);
                 }
-            }
+                else
+                {
+                    Serial.println("Waiting for 30-minute interval - no low current email sent");
+                }
+          //  }
+            // Note: first_Run_Low_Current_Failure flag is only reset when BOTH_HEATERS_ON (below)
         }
 
         if (heaterState == BOTH_HEATERS_BLOWN)
@@ -147,12 +161,12 @@ void updateHeaterControl(SystemStatus &status)
             Serial.print((now - lastTotalFailureEmail) / 1000);
             Serial.println(" seconds");
             Serial.print("First run flag: ");
-            Serial.println(firstRunTotalFailure ? "true" : "false");
+            Serial.println(first_Run_Total_Failure ? "true" : "false");
 
-            if (firstRunTotalFailure)
+            if (first_Run_Total_Failure)
             {
                 Serial.println("Sending FIRST total failure email");
-                firstRunTotalFailure = false;
+                first_Run_Total_Failure = false;
                 lastTotalFailureEmail = now;
                 char message[200];
                 sprintf(message, "Both heaters have failed! Current: %.2fA. Immediate attention required!", currentReading);
@@ -175,18 +189,18 @@ void updateHeaterControl(SystemStatus &status)
         else if (heaterState == ONE_HEATER_ON && lastKnownState == BOTH_HEATERS_ON)
         {
             // Single heater failure - one heater stopped working
-            if (firstRunSingleFailure)
+            if (first_Run_Single_Failure)
             {
-                firstRunSingleFailure = false;
-                lastSingleFailureEmail = now;
+                first_Run_Single_Failure = false;
+                last_Single_Failure_Email = now;
                 char message[200];
                 sprintf(message, "One heater has failed. Current: %.2fA (expected ~4.6A). System still operational but reduced efficiency.", currentReading);
                 sendEmail("WARNING: Single Heater Failure", message);
             }
             // Check if 30 minutes have passed since last email attempt
-            else if (now - lastSingleFailureEmail >= 1800000UL)
+            else if (now - last_Single_Failure_Email >= 1800000UL)
             {
-                lastSingleFailureEmail = now; // Update timestamp regardless of email success
+                last_Single_Failure_Email = now; // Update timestamp regardless of email success
                 char message[200];
                 sprintf(message, "One heater has failed. Current: %.2fA (expected ~4.6A). System still operational but reduced efficiency.", currentReading);
                 sendEmail("WARNING: Single Heater Failure", message);
@@ -201,11 +215,16 @@ void updateHeaterControl(SystemStatus &status)
         // Reset failure flags only when both heaters are working properly
         if (heaterState == BOTH_HEATERS_ON)
         {
-            firstRunSingleFailure = true;     // Only reset when both heaters working
-            firstRunLowCurrentFailure = true; // Reset low current failure flag too
-            firstRunTotalFailure = true;      // Always reset total failure flag when any heater current detected
+            // Reset all failure flags when both heaters confirmed working
+            if (!first_Run_Single_Failure || !first_Run_Low_Current_Failure || !first_Run_Total_Failure)
+            {
+                Serial.println("✅ Both heaters working properly - resetting all failure flags");
+            }
+            first_Run_Single_Failure = true;     // Reset when both heaters working
+            first_Run_Low_Current_Failure = true; // Reset low current failure flag when both heaters working
+            first_Run_Total_Failure = true;      // Reset total failure flag when both heaters working
         }
-        // firstRunTotalFailure = true; // Always reset total failure flag when any heater current detected
+        // first_Run_Total_Failure = true; // Always reset total failure flag when any heater current detected
     } // End of else if (tempRed < targetTemp - HYSTERESIS) block
     else
     {

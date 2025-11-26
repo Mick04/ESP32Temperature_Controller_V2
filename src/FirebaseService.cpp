@@ -6,12 +6,7 @@
 #include "config.h"
 #include <WiFi.h>
 #include <Firebase_ESP_Client.h>
-#include "TemperatureSensors.h"
-#include "GetSchedule.h"
-#include "FirebaseService.h"
-#include "config.h"
-#include <WiFi.h>
-#include <Firebase_ESP_Client.h>
+#include <time.h>
 #include "TemperatureSensors.h"
 #include "GetSchedule.h"
 #include "MQTTManager.h" // For MQTT client access
@@ -256,6 +251,187 @@ void pushSensorDataToFirebase(float tempRed, float tempBlue, float tempGreen)
     // Store timestamp for when data was last updated
     String timestamp = getFormattedTime();
     Firebase.RTDB.setString(&fbData, "ESP32/control/sensors/lastUpdated", timestamp);
+}
+
+// New function: Store sensor data with timestamp for historical charts
+void pushSensorDataToFirebaseHistory(float tempRed, float tempBlue, float tempGreen)
+{
+    if (!fbInitialized)
+    {
+        return;
+    }
+
+    // Get current timestamp in ISO format
+    time_t now = time(nullptr);
+    char basePath[100];
+    char latestPointerPath[100];
+
+    if (now < 1000000000)
+    { // If time not set properly, use millis as fallback
+        snprintf(basePath, sizeof(basePath), "ESP32/history/sensors/T%lu", millis());
+
+        // Always update the latest pointer for React app discovery
+        snprintf(latestPointerPath, sizeof(latestPointerPath), "ESP32/history/latest");
+        Firebase.RTDB.setString(&fbData, latestPointerPath, basePath);
+
+        if (!isnan(tempRed))
+        {
+            char redPath[120];
+            snprintf(redPath, sizeof(redPath), "%s/tempRed", basePath);
+            Firebase.RTDB.setFloat(&fbData, redPath, tempRed);
+        }
+        if (!isnan(tempBlue))
+        {
+            char bluePath[120];
+            snprintf(bluePath, sizeof(bluePath), "%s/tempBlue", basePath);
+            Firebase.RTDB.setFloat(&fbData, bluePath, tempBlue);
+        }
+        if (!isnan(tempGreen))
+        {
+            char greenPath[120];
+            snprintf(greenPath, sizeof(greenPath), "%s/tempGreen", basePath);
+            Firebase.RTDB.setFloat(&fbData, greenPath, tempGreen);
+        }
+
+        char timeStringPath[120];
+        char chartDataPath[120];
+        snprintf(timeStringPath, sizeof(timeStringPath), "%s/timeString", basePath);
+        snprintf(chartDataPath, sizeof(chartDataPath), "%s/chartData", basePath);
+
+        String formattedTime = getFormattedTime();
+        Firebase.RTDB.setString(&fbData, timeStringPath, formattedTime);
+
+        // Add chart-optimized data structure for fallback case
+        char chartDataJson[200];
+        snprintf(chartDataJson, sizeof(chartDataJson),
+                 "{\"x\":\"%s\",\"red\":%.2f,\"blue\":%.2f,\"green\":%.2f,\"millis\":%lu}",
+                 formattedTime.c_str(),
+                 isnan(tempRed) ? 0.0 : tempRed,
+                 isnan(tempBlue) ? 0.0 : tempBlue,
+                 isnan(tempGreen) ? 0.0 : tempGreen,
+                 millis());
+        Firebase.RTDB.setString(&fbData, chartDataPath, chartDataJson);
+    }
+    else
+    {
+        Serial.println("✅ Using NTP time for organized daily structure");
+        // Use organized daily structure for better performance with 3 months of data
+        struct tm *timeinfo = gmtime(&now);
+        char dateKey[16];
+        char timeKey[16];
+        char isoTimestamp[32];
+        char basePath[100];
+
+        // Create date-based organization: YYYY-MM-DD/HH-MM-SS
+        strftime(dateKey, sizeof(dateKey), "%Y-%m-%d", timeinfo);
+        strftime(timeKey, sizeof(timeKey), "%H-%M-%S", timeinfo);
+        strftime(isoTimestamp, sizeof(isoTimestamp), "%Y-%m-%dT%H:%M:%SZ", timeinfo);
+
+        // Organized path: ESP32/history/daily/2024-11-07/10-30-00/
+        snprintf(basePath, sizeof(basePath), "ESP32/history/daily/%s/%s", dateKey, timeKey);
+
+        // Update latest pointer for React app discovery
+        snprintf(latestPointerPath, sizeof(latestPointerPath), "ESP32/history/latest");
+        Firebase.RTDB.setString(&fbData, latestPointerPath, basePath);
+
+        if (!isnan(tempRed))
+        {
+            char redPath[120];
+            snprintf(redPath, sizeof(redPath), "%s/tempRed", basePath);
+            Firebase.RTDB.setFloat(&fbData, redPath, tempRed);
+        }
+        if (!isnan(tempBlue))
+        {
+            char bluePath[120];
+            snprintf(bluePath, sizeof(bluePath), "%s/tempBlue", basePath);
+            Firebase.RTDB.setFloat(&fbData, bluePath, tempBlue);
+        }
+        if (!isnan(tempGreen))
+        {
+            char greenPath[120];
+            snprintf(greenPath, sizeof(greenPath), "%s/tempGreen", basePath);
+            Firebase.RTDB.setFloat(&fbData, greenPath, tempGreen);
+        }
+
+        // Store both Unix timestamp and ISO string for easy querying
+        char timestampPath[120];
+        char isoPath[120];
+        char chartDataPath[120];
+        snprintf(timestampPath, sizeof(timestampPath), "%s/timestamp", basePath);
+        snprintf(isoPath, sizeof(isoPath), "%s/iso", basePath);
+        snprintf(chartDataPath, sizeof(chartDataPath), "%s/chartData", basePath);
+
+        Firebase.RTDB.setInt(&fbData, timestampPath, now);
+        Firebase.RTDB.setString(&fbData, isoPath, isoTimestamp);
+
+        // Add chart-optimized data structure
+        char chartDataJson[200];
+        snprintf(chartDataJson, sizeof(chartDataJson),
+                 "{\"x\":\"%s\",\"red\":%.2f,\"blue\":%.2f,\"green\":%.2f}",
+                 isoTimestamp,
+                 isnan(tempRed) ? 0.0 : tempRed,
+                 isnan(tempBlue) ? 0.0 : tempBlue,
+                 isnan(tempGreen) ? 0.0 : tempGreen);
+        Firebase.RTDB.setString(&fbData, chartDataPath, chartDataJson);
+    }
+}
+
+// Function to periodically store historical data (call this every 5 minutes)
+void storeHistoricalDataIfNeeded(float tempRed, float tempBlue, float tempGreen)
+{
+    static unsigned long lastHistoricalStore = 0;
+    static unsigned long lastCleanup = 0;
+    const unsigned long HISTORICAL_INTERVAL = 600000; // 10 minutes for testing (change back to 300000 for 5 minutes)
+    const unsigned long CLEANUP_INTERVAL = 604800000; // 7 days in milliseconds (weekly cleanup)
+
+    unsigned long now = millis();
+
+    // Store historical data every 5 minutes
+    if (now - lastHistoricalStore >= HISTORICAL_INTERVAL)
+    {
+        pushSensorDataToFirebaseHistory(tempRed, tempBlue, tempGreen);
+        lastHistoricalStore = now;
+    }
+    else
+    {
+        unsigned long remainingTime = HISTORICAL_INTERVAL - (now - lastHistoricalStore);
+    }
+
+    // Clean up old data once per week (removes data older than 3 months)
+    if (now - lastCleanup >= CLEANUP_INTERVAL)
+    {
+        cleanupOldHistoricalData();
+        lastCleanup = now;
+    }
+}
+
+// Cleanup function (removes data older than 3 months = 90 days)
+void cleanupOldHistoricalData()
+{
+    if (!fbInitialized)
+    {
+        return;
+    }
+    time_t now = time(nullptr);
+    if (now < 1000000000)
+    {
+        return;
+    }
+
+    // Calculate cutoff date (90 days ago for 3-month retention)
+    time_t cutoff = now - (90 * 24 * 60 * 60);
+    struct tm *cutoffInfo = gmtime(&cutoff);
+    char cutoffDate[16];
+    strftime(cutoffDate, sizeof(cutoffDate), "%Y-%m-%d", cutoffInfo);
+
+    // For the daily structure ESP32/history/daily/YYYY-MM-DD/
+    // we would need to:
+    // 1. Query all date folders under ESP32/history/daily/
+    // 2. Compare each YYYY-MM-DD with cutoffDate
+    // 3. Delete entire daily folders older than 90 days
+
+    // This is more efficient than the old structure since we can
+    // delete entire days at once rather than individual entries
 }
 
 /**
