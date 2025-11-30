@@ -54,19 +54,19 @@ double getCurrentReading()
 //   if (current > 3.5) return BOTH_HEATERS_ON;                    // Both 150W heaters
 HeaterState getHeaterState(double current)
 {
-    if (current < 0.45)
+    if (current < 2)//0.45
     {
         return BOTH_HEATERS_BLOWN; // No current detected
     }
-    else if (current >= 0.46 && current < 1.5)
+    else if (current >= 2 && current < 2.7)//0.46 to 1.5
     {
         return BOTH_HEATERS_BLOWN; // Very low current - both heaters severely degraded/failing
     }
-    else if (current >= 1.6 && current <= 3.0)
+    else if (current >= 3 && current <= 3.7)//2.6 to 3.0
     {
         return ONE_HEATER_ON; // ~2.3A = One 100W heater
     }
-    else if (current >= 3.1)
+    else if (current >= 4.0)
     {
         return BOTH_HEATERS_ON; // ~3.8A = Both 100W heaters
     }

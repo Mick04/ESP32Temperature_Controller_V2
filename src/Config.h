@@ -36,6 +36,8 @@ enum HeaterState
     BOTH_HEATERS_ON,   // >3.5A - Both heaters working
     BOTH_HEATERS_BLOWN // ZERO current reading
 };
+// this can be deleted when testing is complete
+const char* heaterStateToString(HeaterState state);
 
 // SystemStatus struct definition
 struct SystemStatus
