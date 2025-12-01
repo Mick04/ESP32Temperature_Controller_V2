@@ -147,8 +147,8 @@ void updateHeaterControl(SystemStatus &status)
         {
             Serial.println("");
             Serial.println("♨️♨️♨️ One heater detected as ON ♨️♨️♨️");
-            // Serial.print("Current reading: ");
-            // Serial.print(currentReading, 2);
+            Serial.print("now - last_Single_Heater_Alert_Email: ");
+            Serial.println(now - last_Single_Heater_Alert_Email/60);
             // Serial.println(" A");
             Serial.println("♨️♨️♨️ One heater detected as ON ♨️♨️♨️");
             Serial.println("");
@@ -156,28 +156,29 @@ void updateHeaterControl(SystemStatus &status)
             {
                 Serial.println("Sending FIRST low current failure email");
                 first_Run_Single_Heater_Alert = false;
-                first_Run_Total_Failure = now; // Reset total failure flag as at least one heater is working
+                //first_Run_Total_Failure = now; // Reset total failure flag as at least one heater is working
+                last_Single_Heater_Alert_Email = now;
                 char message[200];
                 sprintf(message, "One heater has failed. Current: %.2fA (expected ~4.6A). System still operational but reduced efficiency.", currentReading);
                 sendEmail("WARNING: Single Heater Failure Attention needed", message);
             }
 
             // Check if 30 minutes have passed since last email attempt
-            else if (now - last_Single_Heater_Alert_Email >= 60000UL)
+            else if (now - last_Single_Heater_Alert_Email >= 60000UL)//1800000UL
             {
-                Serial.println("30 minutes elapsed - sending repeat low current failure email");
-                // last_Single_Heater_Alert_Email = now; // Update timestamp regardless of email success
-                // char message[200];
-                // sprintf(message, "One heater has failed. Current: %.2fA (expected ~4.6A). System still operational but reduced efficiency.", currentReading);
-                // sendEmail("WARNING: Single Heater Failure Attention needed", message);
+                Serial.println("1 minute elapsed - sending repeat low current failure email");
+                last_Single_Heater_Alert_Email = now; // Update timestamp regardless of email success
+                char message[200];
+                sprintf(message, "One heater has failed. Current: %.2fA (expected ~4.6A). System still operational but reduced efficiency.", currentReading);
+                sendEmail("WARNING: Single Heater Failure Attention needed", message);
             }
         }
         if (heaterState == BOTH_HEATERS_BLOWN)
         {
             Serial.println("");
             Serial.println("♨️♨️♨️ Both heaters detected as BLOWN ♨️♨️♨️");
-            // Serial.print("Current reading: ");
-            // Serial.print(currentReading, 2);
+            Serial.print("now - last_Total_Failure_Email: ");
+            Serial.print((now - last_Total_Failure_Email)/60);
             // Serial.println(" A");
             Serial.println("");
             if (first_Run_Total_Failure)
@@ -190,7 +191,7 @@ void updateHeaterControl(SystemStatus &status)
                 sendEmail("Immediate attention required! CRITICAL: Total Heater Failure", message);
             }
 
-            else if (now - last_Total_Failure_Email >= 60000UL)
+            else if (now - last_Total_Failure_Email >= 3600000UL)
             {
                 Serial.println("30 minutes elapsed - sending repeat total failure email");
                 last_Total_Failure_Email = now; // Update timestamp regardless of email success
