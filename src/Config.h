@@ -39,6 +39,13 @@ enum HeaterState
 // this can be deleted when testing is complete
 const char* heaterStateToString(HeaterState state);
 
+// ...existing code...
+
+// Debug configuration
+#define DEBUG_SERIAL true  // Set to false to disable all serial output
+
+// ...existing code...
+
 // SystemStatus struct definition
 struct SystemStatus
 {
