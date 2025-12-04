@@ -1,3 +1,6 @@
+//==============================
+// Target Temperature Management
+//==============================
 float targetTemp = 0; // persistent across calls
 float getTargetTemp()
 {
@@ -22,7 +25,7 @@ float getTargetTemp()
 
 // External declarations
 bool AmFlag = false;
-// float targetTemp = 0.0;
+bool SINGLE_HEATER_OFF = false;
 
 // Global flag to force schedule cache refresh
 static bool forceScheduleRefresh = false;
@@ -36,12 +39,15 @@ static unsigned long last_Single_Heater_Alert_Email = 0; // Separate timer for 1
 static unsigned long last_Total_Failure_Email = 0;
 static HeaterState lastKnownState = BOTH_HEATERS_ON; // Assume both working initially
 
+// Forward declaration
+void check_E_Mail_Timers(double currentReading, unsigned long currentMillis);
+
 // Heater control function
 void updateHeaterControl(SystemStatus &status)
 {
-    // getTime();
     getTime();                               // Updates Hours and Minutes
     String currentTime = getFormattedTime(); // Returns "HH:MM"
+    
     if (currentTime < "12:00")
     {
         AmFlag = true;
@@ -50,11 +56,11 @@ void updateHeaterControl(SystemStatus &status)
     {
         AmFlag = false;
     }
+    
     readAllSensors();
     float tempRed = getTemperature(0); // Get the value of the Red sensor
 
     float newTargetTemp = AmFlag ? currentSchedule.amTemp : currentSchedule.pmTemp;
-
     String scheduledTime = AmFlag ? currentSchedule.amTime : currentSchedule.pmTime;
 
     if (scheduledTime == currentTime)
@@ -70,20 +76,28 @@ void updateHeaterControl(SystemStatus &status)
         Serial.println("==================================================");
 #endif
     }
+    
     publishSingleValue("esp32/control/targetTemperature", (float)(round(targetTemp * 10) / 10.0));
-    pushTargetTempToFirebase((float)(round(targetTemp * 10) / 10.0)); // // Display current values BEFORE control logic
-    const float HYSTERESIS = 0.25;                                    // degrees - Balanced for responsive control while preventing oscillation
+    pushTargetTempToFirebase((float)(round(targetTemp * 10) / 10.0));
+    
+    const float HYSTERESIS = 0.25; // degrees - Balanced for responsive control while preventing oscillation
+    
     //***************************************
-    // Keep this code No. 1
+    // Temperature above target + hysteresis - Turn OFF
     //***************************************
     if (tempRed > targetTemp + HYSTERESIS)
-    // if (tempRed > targetTemp)
     {
-
-        digitalWrite(RELAY_PIN, HIGH); // Changed: HIGH = Relay OFF
-        status.heater = HEATERS_OFF;   // Update to use new enum
+        digitalWrite(RELAY_PIN, HIGH); // HIGH = Relay OFF
+        status.heater = HEATERS_OFF;
         publishSystemData();
         updateLEDs(status);
+        
+        // Check email timers even when heater is off (if single heater is failed)
+        if (SINGLE_HEATER_OFF)
+        {
+            unsigned long currentMillis = millis();
+            check_E_Mail_Timers(0.0, currentMillis); // Pass 0.0 as we don't have current reading when off
+        }
 
 #if DEBUG_SERIAL
         Serial.println("❄️❄️❄️ Heater OFF ❄️❄️❄️");
@@ -96,17 +110,17 @@ void updateHeaterControl(SystemStatus &status)
         Serial.println("❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️");
 #endif
     }
-    //************************************
-    // No2
+    //***************************************
+    // Temperature below target - Turn ON and monitor heater state
+    //***************************************
     else if (tempRed < targetTemp)
     {
-        digitalWrite(RELAY_PIN, LOW);                // Changed: LOW = Relay ON
+        digitalWrite(RELAY_PIN, LOW); // LOW = Relay ON
         double currentReading = getCurrentReading(); // Get current voltage reading for heater state analysis
         HeaterState heaterState = getHeaterState(currentReading);
         status.heater = heaterState;
-        ;
         updateLEDs(status);
-
+        
 #if DEBUG_SERIAL
         Serial.println("♨️♨️♨️ Heater ON ♨️♨️♨️");
         Serial.print("Current reading: ");
@@ -118,42 +132,37 @@ void updateHeaterControl(SystemStatus &status)
 #endif
 
         publishSystemData();
-
-        unsigned long now = millis(); // Declare now here so it's available for all conditions
+        unsigned long currentMillis = millis();
+        
+        // Handle ONE_HEATER_ON state
         if (heaterState == ONE_HEATER_ON)
         {
 #if DEBUG_SERIAL
-            Serial.println("♨️♨️♨️ One heater detected as ON ♨️♨️♨️");
+            Serial.println("⚠️⚠️⚠️ One heater detected as ON ⚠️⚠️⚠️");
             Serial.print("Time since last email: ");
-            Serial.print((now - last_Single_Heater_Alert_Email) / 60000);
+            Serial.print((currentMillis - last_Single_Heater_Alert_Email));
             Serial.println(" minutes");
 #endif
             if (first_Run_Single_Heater_Alert)
             {
-
 #if DEBUG_SERIAL
                 Serial.println("Sending FIRST single heater failure email");
 #endif
                 first_Run_Single_Heater_Alert = false;
-                last_Single_Heater_Alert_Email = now;
+                last_Single_Heater_Alert_Email = currentMillis;
                 char message[200];
-                sprintf(message, "One heater has failed. Current: %.2fA (expected ~4.6A). System still operational but reduced efficiency.", currentReading);
-                sendEmail("WARNING: Single Heater Failure Attention needed", message);
+                sprintf(message, "One heater has failed. Current: %.2fA (expected ~1.6-2.5A). System still operational but reduced efficiency.", currentReading);
+                sendEmail("WARNING: Single Heater Failure - Attention Needed", message);
+                SINGLE_HEATER_OFF = true;
             }
-
-            // Check if 30 minutes have passed since last email attempt
-            else if (now - last_Single_Heater_Alert_Email >= 60000UL) // 1800000UL
+            else
             {
-#if DEBUG_SERIAL
-                Serial.println("30 minutes elapsed - sending repeat single heater failure email");
-#endif
-                last_Single_Heater_Alert_Email = now; // Update timestamp regardless of email success
-                char message[200];
-                sprintf(message, "One heater has failed. Current: %.2fA (expected ~4.6A). System still operational but reduced efficiency.", currentReading);
-                sendEmail("WARNING: Single Heater Failure Attention needed", message);
+                // Check for reminder emails
+                check_E_Mail_Timers(currentReading, currentMillis);
             }
         }
-        if (heaterState == BOTH_HEATERS_BLOWN)
+        // Handle BOTH_HEATERS_BLOWN state
+        else if (heaterState == BOTH_HEATERS_BLOWN)
         {
 #if DEBUG_SERIAL
             Serial.println("🚨🚨🚨 Both heaters detected as BLOWN 🚨🚨🚨");
@@ -161,8 +170,10 @@ void updateHeaterControl(SystemStatus &status)
             Serial.print(currentReading, 2);
             Serial.println(" A");
             Serial.print("Time since last email: ");
-            Serial.print((now - last_Total_Failure_Email) / 60000);
+            Serial.print((currentMillis - last_Total_Failure_Email) / 60000);
             Serial.println(" minutes");
+            Serial.print(" first_Run_Total_Failure: ");
+            Serial.println(first_Run_Total_Failure);
 #endif
 
             if (first_Run_Total_Failure)
@@ -170,51 +181,70 @@ void updateHeaterControl(SystemStatus &status)
 #if DEBUG_SERIAL
                 Serial.println("Sending FIRST total failure email");
 #endif
-
                 first_Run_Total_Failure = false;
-                last_Total_Failure_Email = now;
+                last_Total_Failure_Email = currentMillis;
                 char message[200];
                 sprintf(message, "Both heaters have failed! Current: %.2fA. Immediate attention required!", currentReading);
-                sendEmail("Immediate attention required! CRITICAL: Total Heater Failure", message);
+                sendEmail("WARNING: Both Heater Failure - Attention Needed", message);
             }
-
-            else if (now - last_Total_Failure_Email >= 3600000UL)
+            else if (currentMillis - last_Total_Failure_Email >= 1800000UL) // 30 minutes
             {
 #if DEBUG_SERIAL
-                Serial.println("1 hour elapsed - sending repeat total failure email");
+                Serial.println("30 minutes elapsed - sending repeat total failure email");
 #endif
-
-                last_Total_Failure_Email = now; // Update timestamp regardless of email success
+                last_Total_Failure_Email = currentMillis;
                 char message[200];
                 sprintf(message, "Both heaters have failed! Current: %.2fA. Immediate attention required!", currentReading);
-                sendEmail("Immediate attention required! CRITICAL: Total Heater Failure", message);
+                sendEmail("WARNING: Both Heater Failure - Attention Needed", message);
             }
         }
-        if (heaterState == BOTH_HEATERS_ON)
-            // Reset failure flags when both heaters confirmed working
-            if (!first_Run_Single_Heater_Alert)
+        // Handle BOTH_HEATERS_ON state - Reset all failure flags
+        else if (heaterState == BOTH_HEATERS_ON)
+        {
+            if (!first_Run_Single_Heater_Alert || !first_Run_Total_Failure || SINGLE_HEATER_OFF)
             {
 #if DEBUG_SERIAL
-                Serial.println("✅ Both heaters working properly - resetting single heater failure flag");
+                Serial.println("✅ Both heaters working properly - resetting all failure flags");
 #endif
                 first_Run_Single_Heater_Alert = true;
+                first_Run_Total_Failure = true;
+                SINGLE_HEATER_OFF = false;
             }
+        }
     }
+    //***************************************
+    // Temperature within hysteresis band - maintain current state
+    //***************************************
     else
     {
-        // Temperature is within hysteresis band - maintain current state
         publishSystemData();
         updateLEDs(status);
 
 #if DEBUG_SERIAL
         Serial.println("🌡️ Temperature within hysteresis band - maintaining current state");
 #endif
-    } // End of main temperature control if-else structure
+    }
 } // End of updateHeaterControl function
 
-// // Function to refresh the cached schedule values
-// // Call this whenever schedule data is updated via MQTT
+// Function to refresh the cached schedule values
+// Call this whenever schedule data is updated via MQTT
 void refreshScheduleCache()
 {
     forceScheduleRefresh = true;
+}
+
+// Function to check and send reminder emails for single heater failure
+void check_E_Mail_Timers(double currentReading, unsigned long currentMillis)
+{
+    // Check if 60 minutes have passed since last email attempt
+    if (currentMillis - last_Single_Heater_Alert_Email >= 3600000UL) // 3600000 ms = 60 minutes
+    {
+#if DEBUG_SERIAL
+        Serial.println("10 minutes elapsed - sending repeat single heater failure email");
+#endif
+        last_Single_Heater_Alert_Email = currentMillis;
+        char message[200];
+        sprintf(message, "One heater has failed. Current: %.2fA (expected ~1.6-2.5A). System still operational but reduced efficiency.", currentReading);
+        sendEmail("WARNING: Single Heater Failure - Attention Needed", message);
+    }
 }

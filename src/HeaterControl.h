@@ -16,4 +16,5 @@ void updateHeaterControl(SystemStatus &status);
 void refreshScheduleCache(); // Force refresh of cached schedule values
 void getTime();
 void publishSystemData();
+void check_E_Mail_Timers();
 #endif // HEATERCONTROL_H

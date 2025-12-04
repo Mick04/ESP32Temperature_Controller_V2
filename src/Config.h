@@ -3,6 +3,7 @@
 // ==================================================
 
 #pragma once
+#include <Arduino.h>
 
 // === WiFi State Management Start ===
 enum WiFiState
@@ -11,6 +12,38 @@ enum WiFiState
     CONNECTED,
     DISCONNECTED
 };
+// === WiFi State Management end ===
+
+// ==================================================
+// File: src/config.h
+// ==================================================
+
+#pragma once
+
+// === WiFi State Management Start ===
+// ...existing code...
+
+// === Debug Configuration ===
+#define DEBUG_SERIAL true          // Overall debug control
+#define DEBUG_VERBOSE false        // Turn off chatty output  
+#define DEBUG_CRITICAL true        // Keep failure alerts  
+#define DEBUG_EMAIL true           // Keep email status
+#define DEBUG_STATE_CHANGES true   // Keep state change notifications
+
+// Helper function to check serial connection (optional enhancement)
+inline bool isSerialConnected() {
+    #if DEBUG_SERIAL
+        return Serial && Serial.availableForWrite() > 0;
+    #else
+        return false;
+    #endif
+}
+
+// Safe Serial Print Macros (optional enhancement)
+#define DEBUG_PRINT(x) do { if (DEBUG_SERIAL && isSerialConnected()) Serial.print(x); } while(0)
+#define DEBUG_PRINTLN(x) do { if (DEBUG_SERIAL && isSerialConnected()) Serial.println(x); } while(0)
+
+// ...rest of your existing config...
 
 enum FirebaseState
 {
@@ -36,15 +69,11 @@ enum HeaterState
     BOTH_HEATERS_ON,   // >3.5A - Both heaters working
     BOTH_HEATERS_BLOWN // ZERO current reading
 };
-// this can be deleted when testing is complete
+// // Function declarations
 const char* heaterStateToString(HeaterState state);
-
-// ...existing code...
 
 // Debug configuration
 #define DEBUG_SERIAL true  // Set to false to disable all serial output
-
-// ...existing code...
 
 // SystemStatus struct definition
 struct SystemStatus
@@ -134,5 +163,6 @@ struct SystemStatus
 // Function prototypes
 bool voltageSensor();       // Returns true if heater is drawing current, false if not
 double getCurrentReading(); // Returns actual current reading for detailed analysis
+void updateIrmsToFirebase();  // Call periodically to update Firebase with latest Irms value
 
 HeaterState getHeaterState(double current);

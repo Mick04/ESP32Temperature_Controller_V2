@@ -1,6 +1,3 @@
-/////////////////////////////
-// this file can be deleted when testing is complete
-//////////////////////////////////
 // Config.cpp
 
 #include "Config.h"

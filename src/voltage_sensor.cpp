@@ -9,6 +9,12 @@
 #include "EmonLib.h"
 #include <SPIFFS.h>
 #include "Config.h"
+#include "FirebaseService.h"
+
+// Add these static variables at the top
+//for periodic Irms updates
+static unsigned long lastIrmsUpdate = 0;
+static double lastIrmsReading = 0;
 
 EnergyMonitor emon1;
 
@@ -32,6 +38,9 @@ double getCurrentReading()
     Serial.println(" A");
     Serial.println("♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️♨️");
 #endif
+    // Store last reading for Firebase updates
+lastIrmsReading = Irms;
+
     // Apply baseline offset correction
     Irms -= BASELINE_OFFSET;
     if (Irms < 0)
@@ -46,34 +55,91 @@ double getCurrentReading()
     return Irms;
 }
 
-// Get detailed heater status based on current draw - Updated for 2×100W heaters
-// Current readings: 1×100W = ~2.3A, 2×100W = ~3.8A
-//
-// Previous 150W heater configuration (for reference if reverting):
-// Readings: 1×150W = ~3.0A, 2×150W = ~5.9A
-// Old thresholds:
-//   if (current >= 1.5 && current <= 3.0) return ONE_HEATER_ON;   // One 150W heater
-//   if (current > 3.5) return BOTH_HEATERS_ON;                    // Both 150W heaters
 HeaterState getHeaterState(double current)
 {
-    if (current < 2) // 0.45
+    static HeaterState lastState = BOTH_HEATERS_ON; // Remember last state
+    static const double HYSTERESIS = 0.2; // 0.2A deadband to prevent flickering
+    
+    // Determine raw state first
+    HeaterState rawState;
+    
+    if (current < 1.5)
     {
-        return BOTH_HEATERS_BLOWN; // No current detected
+        rawState = BOTH_HEATERS_BLOWN;
     }
-    else if (current >= 2 && current < 2.7) // 0.46 to 1.5
+    else if (current >= 1.5 && current <= 2.8)
     {
-        return BOTH_HEATERS_BLOWN; // Very low current - both heaters severely degraded/failing
+        rawState = ONE_HEATER_ON;
     }
-    else if (current >= 3 && current <= 3.7) // 2.6 to 3.0
+    else if (current > 2.8)
     {
-        return ONE_HEATER_ON; // ~2.3A = One 100W heater
+        rawState = BOTH_HEATERS_ON;
     }
-    else if (current >= 4.0)
+    else 
     {
-        return BOTH_HEATERS_ON; // ~3.8A = Both 100W heaters
+        rawState = HEATERS_OFF;
     }
-    else
+    
+    // Apply hysteresis to prevent rapid state changes
+    if (rawState != lastState) 
     {
-        return HEATERS_OFF; // Between thresholds - uncertain state
+        // Only change state if we're clearly in a different range
+        switch (lastState) 
+        {
+            case ONE_HEATER_ON:
+                // Need to be clearly above 3.0A to switch to BOTH_HEATERS_ON
+                if (current > 3.0) {
+                    lastState = BOTH_HEATERS_ON;
+                }
+                // Need to be clearly below 1.3A to switch to BOTH_HEATERS_BLOWN  
+                else if (current < 1.3) {
+                    lastState = BOTH_HEATERS_BLOWN;
+                }
+                break;
+                
+            case BOTH_HEATERS_ON:
+                // Need to be clearly below 2.6A to switch to ONE_HEATER_ON
+                if (current < 2.6) {
+                    lastState = ONE_HEATER_ON;
+                }
+                break;
+                
+            case BOTH_HEATERS_BLOWN:
+                // Need to be clearly above 1.7A to switch to ONE_HEATER_ON
+                if (current > 1.7) {
+                    lastState = ONE_HEATER_ON;
+                }
+                break;
+                
+            default:
+                lastState = rawState;
+                break;
+        }
+    }
+    
+    #if DEBUG_SERIAL
+        Serial.print("Current: ");
+        Serial.print(current, 2);
+        Serial.print("A, Raw state: ");
+        Serial.print(heaterStateToString(rawState));
+        Serial.print(", Final state: ");
+        Serial.println(heaterStateToString(lastState));
+    #endif
+    
+    return lastState;
+}
+
+//Add this function for periodic updates
+void updateIrmsToFirebase() {
+    unsigned long now = millis();
+    
+    // Update every 30 seconds
+    //if (fbInitialized && (now - lastIrmsUpdate > 30000)) {
+        if (Firebase.RTDB.setFloat(&fbData, "ESP32/control/IrmsReading", lastIrmsReading)) {
+            #if DEBUG_SERIAL
+                Serial.println("📊 Irms reading sent to Firebase");
+            #endif
+        //}
+        lastIrmsUpdate = now;
     }
 }

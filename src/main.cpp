@@ -152,12 +152,13 @@ void loop()
   {
     // Read all temperature sensors first
     readAllSensors();
-static bool firstReading = true;
-if (firstReading) {
-    firstReading = false;
-    status.heater = HEATERS_OFF;
-     updateLEDs(status); // Ensure LEDs are updated on first reading
-}
+    static bool firstReading = true;
+    if (firstReading)
+    {
+      firstReading = false;
+      status.heater = HEATERS_OFF;
+      updateLEDs(status); // Ensure LEDs are updated on first reading
+    }
     // Check if any temperature values have changed
     if (checkTemperatureChanges())
     {
@@ -193,16 +194,13 @@ if (firstReading) {
     handleMQTT();                  // This calls mqttClient.loop() internally
     status.mqtt = getMQTTStatus(); // Update MQTT status
   }
-
-  // Update heater control and LEDs using the unified status object
-  updateHeaterControl(status);
   /*************************************
    *   MQTT Connection Management.     *
    *    end                        *
    *************************************/
-}
-// put function definitions here:
-int myFunction(int x, int y)
-{
-  return x + y;
+
+  // Update heater control and LEDs using the unified status object
+  updateHeaterControl(status);
+  // save Irms reading to Firebase periodically
+  updateIrmsToFirebase();
 }
