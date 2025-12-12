@@ -1,7 +1,7 @@
 // ==================================================
 // File: src/config.h
+// ESP32 Reptile Heater Controller – Global Configuration
 // ==================================================
-
 #pragma once
 #include <Arduino.h>
 
@@ -14,21 +14,13 @@ enum WiFiState
 };
 // === WiFi State Management end ===
 
-// ==================================================
-// File: src/config.h
-// ==================================================
 
-#pragma once
-
-// === WiFi State Management Start ===
-// ...existing code...
-
-// === Debug Configuration ===
-#define DEBUG_SERIAL true          // Overall debug control
-#define DEBUG_VERBOSE false        // Turn off chatty output  
-#define DEBUG_CRITICAL true        // Keep failure alerts  
-#define DEBUG_EMAIL true           // Keep email status
-#define DEBUG_STATE_CHANGES true   // Keep state change notifications
+// // === Debug Configuration ===
+// #define DEBUG_SERIAL true          // Overall debug control
+// #define DEBUG_VERBOSE false        // Turn off chatty output  
+// #define DEBUG_CRITICAL true        // Keep failure alerts  
+// #define DEBUG_EMAIL true           // Keep email status
+// #define DEBUG_STATE_CHANGES true   // Keep state change notifications
 
 // Helper function to check serial connection (optional enhancement)
 inline bool isSerialConnected() {
