@@ -80,8 +80,8 @@ struct SystemStatus
 //====WiFi State Management end ===
 
 // === Wi-Fi Start ===
-// #define WIFI_SSID "Gimp_EXT"
-#define WIFI_SSID "Gimp"
+#define WIFI_SSID "Gimp_EXT"
+//#define WIFI_SSID "Gimp"
 #define WIFI_PASSWORD "FC7KUNPX"
 // === Wi-Fi End ===
 
